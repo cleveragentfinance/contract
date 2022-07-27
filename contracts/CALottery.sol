@@ -7,14 +7,14 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IRandomNumberGenerator.sol";
-import "./interfaces/ICALottery.sol";
-import "./interfaces/IAgentManager.sol";
+import "./interfaces/ICALotteryOld.sol";
 
 contract CALottery is ReentrancyGuard, ICALottery, Ownable {
     using SafeERC20 for IERC20;
 
     address public injectorAddress;
     address public operatorAddress;
+    address public treasuryAddress;
 
     uint256 public currentLotteryId;
     uint256 public currentTicketId;
@@ -30,10 +30,12 @@ contract CALottery is ReentrancyGuard, ICALottery, Ownable {
     uint256 public constant MIN_DISCOUNT_DIVISOR = 300;
     uint256 public constant MIN_LENGTH_LOTTERY = 4 hours - 5 minutes; // 4 hours
     uint256 public constant MAX_LENGTH_LOTTERY = 4 days + 5 minutes; // 4 days
+    uint256 public constant MAX_TREASURY_FEE = 3000; // 30%
 
     IERC20 public busdToken;
+    IERC20 public freeToken;
     IRandomNumberGenerator public randomGenerator;
-    IAgentManager public manager;
+    address public manager;
 
     enum Status {
         Pending,
@@ -49,6 +51,7 @@ contract CALottery is ReentrancyGuard, ICALottery, Ownable {
         uint256 priceTicketInBusd;
         uint256 discountDivisor;
         uint256[6] rewardsBreakdown; // 0: 1 matching number // 5: 6 matching numbers
+        uint256 treasuryFee; // 500: 5% // 200: 2% // 50: 0.5%
         uint256[6] busdPerBracket;
         uint256[6] countWinnersPerBracket;
         uint256 firstTicketId;
@@ -103,7 +106,7 @@ contract CALottery is ReentrancyGuard, ICALottery, Ownable {
         uint256 injectedAmount
     );
     event LotteryNumberDrawn(uint256 indexed lotteryId, uint256 finalNumber, uint256 countWinningTickets);
-    event NewOperatorAndInjectorAddresses(address operator, address injector);
+    event NewOperatorAndTreasuryAndInjectorAddresses(address operator, address treasury, address injector);
     event NewRandomGenerator(address indexed randomGenerator);
     event TicketsPurchase(address indexed buyer, uint256 indexed lotteryId, uint256 numberTickets);
     event TicketsClaim(address indexed claimer, uint256 amount, uint256 indexed lotteryId, uint256 numberTickets);
@@ -114,10 +117,11 @@ contract CALottery is ReentrancyGuard, ICALottery, Ownable {
      * @param _busdTokenAddress: address of the busd token
      * @param _randomGeneratorAddress: address of the RandomGenerator contract used to work with ChainLink VRF
      */
-    constructor(address _busdTokenAddress, address _randomGeneratorAddress, address _manager) {
+    constructor(address _busdTokenAddress, address _randomGeneratorAddress, address _freeTokenAddress, address _manager) {
         busdToken = IERC20(_busdTokenAddress);
         randomGenerator = IRandomNumberGenerator(_randomGeneratorAddress);
-        manager = IAgentManager(_manager);
+        freeToken = IERC20(_freeTokenAddress);
+        manager = _manager;
 
         // Initializes a mapping
         _bracketCalculator[0] = 1;
@@ -146,7 +150,8 @@ contract CALottery is ReentrancyGuard, ICALottery, Ownable {
         require(_lotteries[_lotteryId].status == Status.Open, "Lottery is not open");
         require(block.timestamp < _lotteries[_lotteryId].endTime, "Lottery is over");
 
-        uint256 buyAmount = manager.buyTicket(msg.sender, _ticketNumbers.length);
+        uint256 freeAmount = freeToken.balanceOf(msg.sender) / 1e18;
+        uint256 buyAmount = _ticketNumbers.length > freeAmount ? _ticketNumbers.length - freeAmount : 0;
 
         // Calculate number of busd to this contract
         uint256 amountBusdToTransfer = _calculateTotalPriceForBulkTickets(
@@ -155,8 +160,10 @@ contract CALottery is ReentrancyGuard, ICALottery, Ownable {
             buyAmount
         );
 
-        // Transfer busd tokens to this contract
-        busdToken.safeTransferFrom(address(msg.sender), address(this), amountBusdToTransfer);
+        freeToken.transferFrom(address(msg.sender), address(this), buyAmount);
+        if(amountBusdToTransfer > 0)
+            // Transfer busd tokens to this contract
+            busdToken.safeTransferFrom(address(msg.sender), address(this), amountBusdToTransfer);
 
         // Increment the total amount collected for the lottery round
         _lotteries[_lotteryId].amountCollectedInBusd += amountBusdToTransfer;
@@ -281,7 +288,13 @@ contract CALottery is ReentrancyGuard, ICALottery, Ownable {
         // Initialize a number to count addresses in the previous bracket
         uint256 numberAddressesInPreviousBracket;
 
-        uint256 amountToShareToWinners = _lotteries[_lotteryId].amountCollectedInBusd;
+        // Calculate the amount to share post-treasury fee
+        uint256 amountToShareToWinners = (
+            ((_lotteries[_lotteryId].amountCollectedInBusd) * (10000 - _lotteries[_lotteryId].treasuryFee))
+        ) / 10000;
+
+        // Initializes the amount to withdraw to treasury
+        uint256 amountToWithdrawToTreasury;
 
         // Calculate prizes in busd for each bracket by starting from the highest one
         for (uint32 i = 0; i < 6; i++) {
@@ -308,8 +321,13 @@ contract CALottery is ReentrancyGuard, ICALottery, Ownable {
                     // Update numberAddressesInPreviousBracket
                     numberAddressesInPreviousBracket = _numberTicketsPerLotteryId[_lotteryId][transformedWinningNumber];
                 }
+                // A. No busd to distribute, they are added to the amount to withdraw to treasury address
             } else {
                 _lotteries[_lotteryId].busdPerBracket[j] = 0;
+
+                amountToWithdrawToTreasury +=
+                    (_lotteries[_lotteryId].rewardsBreakdown[j] * amountToShareToWinners) /
+                    10000;
             }
         }
 
@@ -318,10 +336,15 @@ contract CALottery is ReentrancyGuard, ICALottery, Ownable {
         _lotteries[_lotteryId].status = Status.Claimable;
 
         if (_autoInjection) {
-            pendingInjectionNextLottery = busdToken.balanceOf(address(this)) - pendingAmountToWinners;
+            pendingInjectionNextLottery = amountToWithdrawToTreasury;
+            amountToWithdrawToTreasury = 0;
         }
 
         pendingAmountToWinners += amountToShareToWinners;
+        amountToWithdrawToTreasury = busdToken.balanceOf(address(this)) - pendingAmountToWinners;
+
+        // Transfer busd to treasury address
+        busdToken.safeTransfer(treasuryAddress, amountToWithdrawToTreasury);
 
         emit LotteryNumberDrawn(currentLotteryId, finalNumber, numberAddressesInPreviousBracket);
     }
@@ -371,12 +394,14 @@ contract CALottery is ReentrancyGuard, ICALottery, Ownable {
      * @param _priceTicketInBusd: price of a ticket in busd
      * @param _discountDivisor: the divisor to calculate the discount magnitude for bulks
      * @param _rewardsBreakdown: breakdown of rewards per bracket (must sum to 10,000)
+     * @param _treasuryFee: treasury fee (10,000 = 100%, 100 = 1%)
      */
     function startLottery(
         uint256 _endTime,
         uint256 _priceTicketInBusd,
         uint256 _discountDivisor,
-        uint256[6] calldata _rewardsBreakdown
+        uint256[6] calldata _rewardsBreakdown,
+        uint256 _treasuryFee
     ) external override onlyOperator {
         require(
             (currentLotteryId == 0) || (_lotteries[currentLotteryId].status == Status.Claimable),
@@ -394,6 +419,7 @@ contract CALottery is ReentrancyGuard, ICALottery, Ownable {
         );
 
         require(_discountDivisor >= MIN_DISCOUNT_DIVISOR, "Discount divisor too low");
+        require(_treasuryFee <= MAX_TREASURY_FEE, "Treasury fee too high");
 
         require(
             (_rewardsBreakdown[0] +
@@ -414,6 +440,7 @@ contract CALottery is ReentrancyGuard, ICALottery, Ownable {
             priceTicketInBusd: _priceTicketInBusd,
             discountDivisor: _discountDivisor,
             rewardsBreakdown: _rewardsBreakdown,
+            treasuryFee: _treasuryFee,
             busdPerBracket: [uint256(0), uint256(0), uint256(0), uint256(0), uint256(0), uint256(0)],
             countWinnersPerBracket: [uint256(0), uint256(0), uint256(0), uint256(0), uint256(0), uint256(0)],
             firstTicketId: currentTicketId,
@@ -441,8 +468,7 @@ contract CALottery is ReentrancyGuard, ICALottery, Ownable {
      * @dev Only callable by owner.
      */
     function recoverWrongTokens(address _tokenAddress, uint256 _tokenAmount) external onlyOwner {
-        if(_tokenAddress == address(busdToken))
-            require(busdToken.balanceOf(address(this)) > pendingAmountToWinners + _tokenAmount, "can't withdraw busd");
+        require(_tokenAddress != address(busdToken), "Cannot be busd token");
 
         IERC20(_tokenAddress).safeTransfer(address(msg.sender), _tokenAmount);
 
@@ -475,22 +501,26 @@ contract CALottery is ReentrancyGuard, ICALottery, Ownable {
     }
 
     /**
-     * @notice Set operator, and injector addresses
+     * @notice Set operator, treasury, and injector addresses
      * @dev Only callable by owner
      * @param _operatorAddress: address of the operator
+     * @param _treasuryAddress: address of the treasury
      * @param _injectorAddress: address of the injector
      */
-    function setOperatorAndInjectorAddresses(
+    function setOperatorAndTreasuryAndInjectorAddresses(
         address _operatorAddress,
+        address _treasuryAddress,
         address _injectorAddress
     ) external onlyOwner {
         require(_operatorAddress != address(0), "Cannot be zero address");
+        require(_treasuryAddress != address(0), "Cannot be zero address");
         require(_injectorAddress != address(0), "Cannot be zero address");
 
         operatorAddress = _operatorAddress;
+        treasuryAddress = _treasuryAddress;
         injectorAddress = _injectorAddress;
 
-        emit NewOperatorAndInjectorAddresses(_operatorAddress, _injectorAddress);
+        emit NewOperatorAndTreasuryAndInjectorAddresses(_operatorAddress, _treasuryAddress, _injectorAddress);
     }
 
     /**

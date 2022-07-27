@@ -27,7 +27,7 @@ import type {
   PromiseOrValue,
 } from "../../common";
 
-export interface InsurAceAgentInterface extends utils.Interface {
+export interface LiquidityInterface extends utils.Interface {
   functions: {
     "amount()": FunctionFragment;
     "availableDeposit(uint256)": FunctionFragment;
@@ -39,21 +39,20 @@ export interface InsurAceAgentInterface extends utils.Interface {
     "harvest()": FunctionFragment;
     "init(address[],uint256[])": FunctionFragment;
     "initialized()": FunctionFragment;
-    "lpToken()": FunctionFragment;
+    "lpRouter()": FunctionFragment;
     "manager()": FunctionFragment;
-    "minDepositAmount()": FunctionFragment;
     "owner()": FunctionFragment;
     "pendingReward()": FunctionFragment;
     "receiveToken()": FunctionFragment;
     "removable()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
-    "rewardController()": FunctionFragment;
     "rewardToken()": FunctionFragment;
     "sellRouter()": FunctionFragment;
-    "target()": FunctionFragment;
+    "totalDepositedAmount()": FunctionFragment;
     "totalValueLocked()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "unlockHarvest()": FunctionFragment;
+    "unlockTimeLeft()": FunctionFragment;
     "unlockWithdraw(uint256)": FunctionFragment;
     "withdraw(uint256)": FunctionFragment;
   };
@@ -70,21 +69,20 @@ export interface InsurAceAgentInterface extends utils.Interface {
       | "harvest"
       | "init"
       | "initialized"
-      | "lpToken"
+      | "lpRouter"
       | "manager"
-      | "minDepositAmount"
       | "owner"
       | "pendingReward"
       | "receiveToken"
       | "removable"
       | "renounceOwnership"
-      | "rewardController"
       | "rewardToken"
       | "sellRouter"
-      | "target"
+      | "totalDepositedAmount"
       | "totalValueLocked"
       | "transferOwnership"
       | "unlockHarvest"
+      | "unlockTimeLeft"
       | "unlockWithdraw"
       | "withdraw"
   ): FunctionFragment;
@@ -120,12 +118,8 @@ export interface InsurAceAgentInterface extends utils.Interface {
     functionFragment: "initialized",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "lpToken", values?: undefined): string;
+  encodeFunctionData(functionFragment: "lpRouter", values?: undefined): string;
   encodeFunctionData(functionFragment: "manager", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "minDepositAmount",
-    values?: undefined
-  ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "pendingReward",
@@ -141,10 +135,6 @@ export interface InsurAceAgentInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "rewardController",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "rewardToken",
     values?: undefined
   ): string;
@@ -152,7 +142,10 @@ export interface InsurAceAgentInterface extends utils.Interface {
     functionFragment: "sellRouter",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "target", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "totalDepositedAmount",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "totalValueLocked",
     values?: undefined
@@ -163,6 +156,10 @@ export interface InsurAceAgentInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "unlockHarvest",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "unlockTimeLeft",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -202,12 +199,8 @@ export interface InsurAceAgentInterface extends utils.Interface {
     functionFragment: "initialized",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "lpToken", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "lpRouter", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "manager", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "minDepositAmount",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "pendingReward",
@@ -223,15 +216,14 @@ export interface InsurAceAgentInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "rewardController",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "rewardToken",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "sellRouter", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "target", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "totalDepositedAmount",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "totalValueLocked",
     data: BytesLike
@@ -242,6 +234,10 @@ export interface InsurAceAgentInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "unlockHarvest",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "unlockTimeLeft",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -269,12 +265,12 @@ export type OwnershipTransferredEvent = TypedEvent<
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
 
-export interface InsurAceAgent extends BaseContract {
+export interface Liquidity extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: InsurAceAgentInterface;
+  interface: LiquidityInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -296,7 +292,9 @@ export interface InsurAceAgent extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    amount(overrides?: CallOverrides): Promise<[BigNumber]>;
+    amount(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber, BigNumber, BigNumber]>;
 
     availableDeposit(
       _amount: PromiseOrValue<BigNumberish>,
@@ -321,9 +319,7 @@ export interface InsurAceAgent extends BaseContract {
 
     depositToken(overrides?: CallOverrides): Promise<[string]>;
 
-    harvest(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+    harvest(overrides?: CallOverrides): Promise<[void]>;
 
     init(
       _addresses: PromiseOrValue<string>[],
@@ -333,11 +329,9 @@ export interface InsurAceAgent extends BaseContract {
 
     initialized(overrides?: CallOverrides): Promise<[boolean]>;
 
-    lpToken(overrides?: CallOverrides): Promise<[string]>;
+    lpRouter(overrides?: CallOverrides): Promise<[string]>;
 
     manager(overrides?: CallOverrides): Promise<[string]>;
-
-    minDepositAmount(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
@@ -351,13 +345,11 @@ export interface InsurAceAgent extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    rewardController(overrides?: CallOverrides): Promise<[string]>;
-
     rewardToken(overrides?: CallOverrides): Promise<[string]>;
 
     sellRouter(overrides?: CallOverrides): Promise<[string]>;
 
-    target(overrides?: CallOverrides): Promise<[string]>;
+    totalDepositedAmount(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     totalValueLocked(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -366,14 +358,14 @@ export interface InsurAceAgent extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    unlockHarvest(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+    unlockHarvest(overrides?: CallOverrides): Promise<[void]>;
+
+    unlockTimeLeft(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     unlockWithdraw(
       _amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+      overrides?: CallOverrides
+    ): Promise<[void]>;
 
     withdraw(
       _amount: PromiseOrValue<BigNumberish>,
@@ -381,7 +373,7 @@ export interface InsurAceAgent extends BaseContract {
     ): Promise<ContractTransaction>;
   };
 
-  amount(overrides?: CallOverrides): Promise<BigNumber>;
+  amount(overrides?: CallOverrides): Promise<[BigNumber, BigNumber, BigNumber]>;
 
   availableDeposit(
     _amount: PromiseOrValue<BigNumberish>,
@@ -406,9 +398,7 @@ export interface InsurAceAgent extends BaseContract {
 
   depositToken(overrides?: CallOverrides): Promise<string>;
 
-  harvest(
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+  harvest(overrides?: CallOverrides): Promise<void>;
 
   init(
     _addresses: PromiseOrValue<string>[],
@@ -418,11 +408,9 @@ export interface InsurAceAgent extends BaseContract {
 
   initialized(overrides?: CallOverrides): Promise<boolean>;
 
-  lpToken(overrides?: CallOverrides): Promise<string>;
+  lpRouter(overrides?: CallOverrides): Promise<string>;
 
   manager(overrides?: CallOverrides): Promise<string>;
-
-  minDepositAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
@@ -436,13 +424,11 @@ export interface InsurAceAgent extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  rewardController(overrides?: CallOverrides): Promise<string>;
-
   rewardToken(overrides?: CallOverrides): Promise<string>;
 
   sellRouter(overrides?: CallOverrides): Promise<string>;
 
-  target(overrides?: CallOverrides): Promise<string>;
+  totalDepositedAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
   totalValueLocked(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -451,14 +437,14 @@ export interface InsurAceAgent extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  unlockHarvest(
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+  unlockHarvest(overrides?: CallOverrides): Promise<void>;
+
+  unlockTimeLeft(overrides?: CallOverrides): Promise<BigNumber>;
 
   unlockWithdraw(
     _amount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+    overrides?: CallOverrides
+  ): Promise<void>;
 
   withdraw(
     _amount: PromiseOrValue<BigNumberish>,
@@ -466,7 +452,9 @@ export interface InsurAceAgent extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    amount(overrides?: CallOverrides): Promise<BigNumber>;
+    amount(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber, BigNumber, BigNumber]>;
 
     availableDeposit(
       _amount: PromiseOrValue<BigNumberish>,
@@ -499,11 +487,9 @@ export interface InsurAceAgent extends BaseContract {
 
     initialized(overrides?: CallOverrides): Promise<boolean>;
 
-    lpToken(overrides?: CallOverrides): Promise<string>;
+    lpRouter(overrides?: CallOverrides): Promise<string>;
 
     manager(overrides?: CallOverrides): Promise<string>;
-
-    minDepositAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
@@ -515,13 +501,11 @@ export interface InsurAceAgent extends BaseContract {
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
-    rewardController(overrides?: CallOverrides): Promise<string>;
-
     rewardToken(overrides?: CallOverrides): Promise<string>;
 
     sellRouter(overrides?: CallOverrides): Promise<string>;
 
-    target(overrides?: CallOverrides): Promise<string>;
+    totalDepositedAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
     totalValueLocked(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -531,6 +515,8 @@ export interface InsurAceAgent extends BaseContract {
     ): Promise<void>;
 
     unlockHarvest(overrides?: CallOverrides): Promise<void>;
+
+    unlockTimeLeft(overrides?: CallOverrides): Promise<BigNumber>;
 
     unlockWithdraw(
       _amount: PromiseOrValue<BigNumberish>,
@@ -580,9 +566,7 @@ export interface InsurAceAgent extends BaseContract {
 
     depositToken(overrides?: CallOverrides): Promise<BigNumber>;
 
-    harvest(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
+    harvest(overrides?: CallOverrides): Promise<BigNumber>;
 
     init(
       _addresses: PromiseOrValue<string>[],
@@ -592,11 +576,9 @@ export interface InsurAceAgent extends BaseContract {
 
     initialized(overrides?: CallOverrides): Promise<BigNumber>;
 
-    lpToken(overrides?: CallOverrides): Promise<BigNumber>;
+    lpRouter(overrides?: CallOverrides): Promise<BigNumber>;
 
     manager(overrides?: CallOverrides): Promise<BigNumber>;
-
-    minDepositAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -610,13 +592,11 @@ export interface InsurAceAgent extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    rewardController(overrides?: CallOverrides): Promise<BigNumber>;
-
     rewardToken(overrides?: CallOverrides): Promise<BigNumber>;
 
     sellRouter(overrides?: CallOverrides): Promise<BigNumber>;
 
-    target(overrides?: CallOverrides): Promise<BigNumber>;
+    totalDepositedAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
     totalValueLocked(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -625,13 +605,13 @@ export interface InsurAceAgent extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    unlockHarvest(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
+    unlockHarvest(overrides?: CallOverrides): Promise<BigNumber>;
+
+    unlockTimeLeft(overrides?: CallOverrides): Promise<BigNumber>;
 
     unlockWithdraw(
       _amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     withdraw(
@@ -666,9 +646,7 @@ export interface InsurAceAgent extends BaseContract {
 
     depositToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    harvest(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
+    harvest(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     init(
       _addresses: PromiseOrValue<string>[],
@@ -678,11 +656,9 @@ export interface InsurAceAgent extends BaseContract {
 
     initialized(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    lpToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    lpRouter(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     manager(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    minDepositAmount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -696,13 +672,13 @@ export interface InsurAceAgent extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    rewardController(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     rewardToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     sellRouter(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    target(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    totalDepositedAmount(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     totalValueLocked(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -711,13 +687,13 @@ export interface InsurAceAgent extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    unlockHarvest(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
+    unlockHarvest(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    unlockTimeLeft(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     unlockWithdraw(
       _amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     withdraw(

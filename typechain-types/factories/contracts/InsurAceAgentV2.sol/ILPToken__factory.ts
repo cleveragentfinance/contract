@@ -7,7 +7,7 @@ import type { Provider } from "@ethersproject/providers";
 import type {
   ILPToken,
   ILPTokenInterface,
-} from "../../../contracts/InsurAceAgent.sol/ILPToken";
+} from "../../../contracts/InsurAceAgentV2.sol/ILPToken";
 
 const _abi = [
   {
@@ -31,6 +31,25 @@ const _abi = [
     name: "burn",
     outputs: [],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    name: "burnWeightPH",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
     type: "function",
   },
   {

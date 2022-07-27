@@ -703,9 +703,10 @@ export interface AgentManager extends BaseContract {
       arg0: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<
-      [string, BigNumber, string, string] & {
+      [string, BigNumber, string, string, string] & {
         master: string;
         pid: BigNumber;
+        lpToken: string;
         depositToken: string;
         rewardToken: string;
       }
@@ -933,9 +934,10 @@ export interface AgentManager extends BaseContract {
     arg0: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<
-    [string, BigNumber, string, string] & {
+    [string, BigNumber, string, string, string] & {
       master: string;
       pid: BigNumber;
+      lpToken: string;
       depositToken: string;
       rewardToken: string;
     }
@@ -1155,9 +1157,10 @@ export interface AgentManager extends BaseContract {
       arg0: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<
-      [string, BigNumber, string, string] & {
+      [string, BigNumber, string, string, string] & {
         master: string;
         pid: BigNumber;
+        lpToken: string;
         depositToken: string;
         rewardToken: string;
       }

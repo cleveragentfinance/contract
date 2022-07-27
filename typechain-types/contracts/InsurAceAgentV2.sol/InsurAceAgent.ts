@@ -54,6 +54,7 @@ export interface InsurAceAgentInterface extends utils.Interface {
     "totalValueLocked()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "unlockHarvest()": FunctionFragment;
+    "unlockTimeLeft()": FunctionFragment;
     "unlockWithdraw(uint256)": FunctionFragment;
     "withdraw(uint256)": FunctionFragment;
   };
@@ -85,6 +86,7 @@ export interface InsurAceAgentInterface extends utils.Interface {
       | "totalValueLocked"
       | "transferOwnership"
       | "unlockHarvest"
+      | "unlockTimeLeft"
       | "unlockWithdraw"
       | "withdraw"
   ): FunctionFragment;
@@ -163,6 +165,10 @@ export interface InsurAceAgentInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "unlockHarvest",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "unlockTimeLeft",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -245,6 +251,10 @@ export interface InsurAceAgentInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "unlockTimeLeft",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "unlockWithdraw",
     data: BytesLike
   ): Result;
@@ -296,7 +306,9 @@ export interface InsurAceAgent extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    amount(overrides?: CallOverrides): Promise<[BigNumber]>;
+    amount(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber, BigNumber, BigNumber]>;
 
     availableDeposit(
       _amount: PromiseOrValue<BigNumberish>,
@@ -370,6 +382,8 @@ export interface InsurAceAgent extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    unlockTimeLeft(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     unlockWithdraw(
       _amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -381,7 +395,7 @@ export interface InsurAceAgent extends BaseContract {
     ): Promise<ContractTransaction>;
   };
 
-  amount(overrides?: CallOverrides): Promise<BigNumber>;
+  amount(overrides?: CallOverrides): Promise<[BigNumber, BigNumber, BigNumber]>;
 
   availableDeposit(
     _amount: PromiseOrValue<BigNumberish>,
@@ -455,6 +469,8 @@ export interface InsurAceAgent extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  unlockTimeLeft(overrides?: CallOverrides): Promise<BigNumber>;
+
   unlockWithdraw(
     _amount: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -466,7 +482,9 @@ export interface InsurAceAgent extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    amount(overrides?: CallOverrides): Promise<BigNumber>;
+    amount(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber, BigNumber, BigNumber]>;
 
     availableDeposit(
       _amount: PromiseOrValue<BigNumberish>,
@@ -531,6 +549,8 @@ export interface InsurAceAgent extends BaseContract {
     ): Promise<void>;
 
     unlockHarvest(overrides?: CallOverrides): Promise<void>;
+
+    unlockTimeLeft(overrides?: CallOverrides): Promise<BigNumber>;
 
     unlockWithdraw(
       _amount: PromiseOrValue<BigNumberish>,
@@ -629,6 +649,8 @@ export interface InsurAceAgent extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    unlockTimeLeft(overrides?: CallOverrides): Promise<BigNumber>;
+
     unlockWithdraw(
       _amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -714,6 +736,8 @@ export interface InsurAceAgent extends BaseContract {
     unlockHarvest(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
+
+    unlockTimeLeft(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     unlockWithdraw(
       _amount: PromiseOrValue<BigNumberish>,

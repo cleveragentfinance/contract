@@ -1,9 +1,11 @@
-//       _                                           _   
-//   ___| | _____   _____ _ __ __ _  __ _  ___ _ __ | |_ 
-//  / __| |/ _ \ \ / / _ \ '__/ _` |/ _` |/ _ \ '_ \| __|
-// | (__| |  __/\ V /  __/ | | (_| | (_| |  __/ | | | |_ 
-//  \___|_|\___| \_/ \___|_|  \__,_|\__, |\___|_| |_|\__|
-//                                  |___/                
+//       _                                           _     __   _____ 
+//      | |                                         | |   /  | |  _  |
+//   ___| | _____   _____ _ __ __ _  __ _  ___ _ __ | |_  `| | | |/' |
+//  / __| |/ _ \ \ / / _ \ '__/ _` |/ _` |/ _ \ '_ \| __|  | | |  /| |
+// | (__| |  __/\ V /  __/ | | (_| | (_| |  __/ | | | |_  _| |_\ |_/ /
+//  \___|_|\___| \_/ \___|_|  \__,_|\__, |\___|_| |_|\__| \___(_)___/ 
+//                                   __/ |                            
+//                                  |___/                             
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
@@ -26,7 +28,6 @@ contract AgentManager is Ownable {
         uint256 amount;
         uint256 debt;
         uint256 pending;
-        uint256 accAmount;
         uint256 lastUpdateTime;
     }
 
@@ -38,13 +39,13 @@ contract AgentManager is Ownable {
         uint256 accAmount;
         uint256 lastUpdateTime;
         uint256 totalEarned;
-        uint256 totalPayed;
         uint256 autoTarget;
     }
 
     struct TargetInfo {
         address master;
         uint256 pid;
+        address lpToken;
         address depositToken;
         address rewardToken;
         address[] initAddresses;
@@ -62,12 +63,11 @@ contract AgentManager is Ownable {
     uint256 public feePercent;
     address[] public routers = [0x10ED43C718714eb63d5aA57B78B54704E256024E];
 
-    // Bonus muliplier for early wdefi makers.
-    uint256 public constant BONUS_MULTIPLIER = 1;
     // Deposit Fee address
     address public feeAddress;
     address public lottery;
     address public proxyAdmin;
+    address public freeToken;
 
     // Info of each pool.
     PoolInfo[] public poolInfo;
@@ -80,11 +80,6 @@ contract AgentManager is Ownable {
     // should be updated
     bool public autoTargetEnabled;
 
-    modifier onlyLottery {
-        require(msg.sender == lottery, "not lottery");
-        _;
-    }
-
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
     event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
     event Harvest(address indexed user, uint256 indexed pid, uint256 amount);
@@ -95,6 +90,7 @@ contract AgentManager is Ownable {
     function initialize(
         address _feeAddress,
         address _lottery,
+        address _freeToken,
         uint256 _apy,
         uint256 _feePercent,
         address _proxyAdmin
@@ -103,6 +99,7 @@ contract AgentManager is Ownable {
         _transferOwnership(msg.sender);
         feeAddress = _feeAddress;
         lottery = _lottery;
+        freeToken = _freeToken;
         apy = _apy;
         feePercent = _feePercent;
         proxyAdmin = _proxyAdmin;
@@ -216,7 +213,7 @@ contract AgentManager is Ownable {
             uint256 multiplier = getMultiplier(user.lastUpdateTime, block.timestamp);
             uint256 reward = multiplier.mul(apy).mul(user.amount).div(1e18);
             user.pending = pendingAmount.add(reward);
-            user.accAmount = (user.accAmount).add(reward);
+            IERC20(freeToken).transfer(_user, reward * 100);
             user.lastUpdateTime = block.timestamp;
         }
     }
@@ -266,6 +263,19 @@ contract AgentManager is Ownable {
             _sendAssetToUser(_pid, _amount);
         }
         emit Withdraw(msg.sender, _pid, _amount);
+    }
+
+    // Withdraw LP tokens from MasterChef.
+    function emergencyWithdraw(uint256 _pid) public {
+        PoolInfo storage pool = poolInfo[_pid];
+        UserInfo storage user = userInfo[_pid][msg.sender];
+        if(user.amount > 0) {
+            user.amount = 0;
+            user.pending = 0;
+            pool.balance = pool.balance.sub(user.amount);
+            _sendAssetToUser(_pid, user.amount);
+        }
+        emit EmergencyWithdraw(msg.sender, _pid, user.amount);
     }
 
     function cancelPendingWithdraw(uint256 _pid) public {
@@ -324,9 +334,9 @@ contract AgentManager is Ownable {
                 DebtInfo storage debt = debtList[index];
                 available = available > debtList[index].amount ? debt.amount : available;
                 if(available == 0) break;
-                pool.debt = pool.debt.sub(available);
-                user.debt = user.debt.sub(available);
-                debt.amount = debt.amount.sub(available);
+                pool.debt = pool.debt.sub(available, "sub: pool debt!");
+                user.debt = user.debt.sub(available, "sub: user debt!");
+                debt.amount = debt.amount.sub(available, "sub: debt!");
                 pool.token.transfer(debt.owner, available);
             }
             _removeZeroList(pid);
@@ -335,25 +345,6 @@ contract AgentManager is Ownable {
         massUpdatePools();
     }
 
-    function buyTicket(address _user, uint256 _amount) public onlyLottery returns (uint256) {
-        uint256 ticketAmount = _amount.mul(1e17);
-        for (uint256 pid = 0; pid < poolInfo.length; pid++) {
-            UserInfo storage user = userInfo[pid][msg.sender];
-            updateUser(pid, _user);
-            if(ticketAmount > user.accAmount) {
-                ticketAmount = ticketAmount.sub(user.accAmount);
-                user.accAmount = 0;
-            }
-            else {
-                user.accAmount = user.accAmount.sub(ticketAmount);
-                ticketAmount = 0;
-                break;
-            }
-        }
-        ticketAmount = ticketAmount.div(1e17);
-        return ticketAmount;
-    }
-    
     // Add a new lp to the pool. Can only be called by the owner.
     // XXX DO NOT add the same LP token more than once. Rewards will be messed up if you do.
     function add(IERC20 _token) public onlyOwner {
@@ -367,7 +358,6 @@ contract AgentManager is Ownable {
             accAmount: 0,
             lastUpdateTime: block.timestamp,
             totalEarned: 0,
-            totalPayed: 0,
             autoTarget: 0
         }));
     }
@@ -375,18 +365,35 @@ contract AgentManager is Ownable {
     function addTarget(address _master, address[] memory _initAddresses, uint256[] memory _initNumbers) public onlyOwner {
         uint256 pid;
         for (uint256 index = 0; index < poolInfo.length; index++) {
-            if(address(poolInfo[index].token) == _initAddresses[0])
+            if(address(poolInfo[index].token) == _initAddresses[1])
                 pid = index;
         }
         targetInfo.push(TargetInfo({
             master: _master,
             pid: pid,
-            depositToken: _initAddresses[0],
-            rewardToken:  _initAddresses[1],
+            lpToken: _initAddresses[0],
+            depositToken: _initAddresses[1],
+            rewardToken:  _initAddresses[2],
             initAddresses: _initAddresses,
             initNumbers: _initNumbers
         }));
     }
+
+    // function updateTarget(uint256 _tid, address _master, address[] memory _initAddresses, uint256[] memory _initNumbers) public onlyOwner {
+    //     uint256 pid;
+    //     for (uint256 index = 0; index < poolInfo.length; index++) {
+    //         if(address(poolInfo[index].token) == _initAddresses[1])
+    //             pid = index;
+    //     }
+    //     TargetInfo memory target = targetInfo[_tid];
+    //     target.master = _master;
+    //     target.pid = pid;
+    //     target.lpToken = _initAddresses[0];
+    //     target.depositToken = _initAddresses[1];
+    //     target.rewardToken =  _initAddresses[2];
+    //     target.initAddresses = _initAddresses;
+    //     target.initNumbers = _initNumbers;
+    // }
 
     function UpdateAgents(uint256[] memory _tids, uint256[] memory _depositAmount, uint256[] memory _withdrawAmount, uint256[] memory _unlockAmount) public onlyOwner{
         for (uint256 i = 0; i < _tids.length; i++) {
@@ -471,7 +478,6 @@ contract AgentManager is Ownable {
         for (uint256 pid = 0; pid < poolInfo.length; pid++) {
             if(poolInfo[pid].totalEarned > poolInfo[pid].accAmount) {
                 uint256 profit = poolInfo[pid].totalEarned - poolInfo[pid].accAmount;
-                poolInfo[pid].totalPayed = poolInfo[pid].totalPayed.add(profit);
                 poolInfo[pid].token.transfer(feeAddress, profit.mul(feePercent).div(10000));
                 uint256 amountOut = _swap(pid, 0, profit.mul(10000 - feePercent).div(10000));
                 poolInfo[0].token.transfer(lottery, amountOut);
@@ -497,7 +503,7 @@ contract AgentManager is Ownable {
 
     // Return reward multiplier over the given _from to _to block.
     function getMultiplier(uint256 _from, uint256 _to) public pure returns (uint256) {
-        return _to.sub(_from).mul(BONUS_MULTIPLIER);
+        return _to.sub(_from);
     }
 
     // View function to see pending Rewards on frontend.
@@ -537,7 +543,7 @@ contract AgentManager is Ownable {
         for (uint256 pid = 0; pid < poolInfo.length; pid++) {
             PoolInfo storage pool = poolInfo[pid];
             totalReward = totalReward.add(pool.accAmount).add(pool.balance);
-            totalProfit = totalProfit.add(poolInfo[pid].totalPayed);
+            totalProfit = totalProfit.add(poolInfo[pid].totalEarned);
         }
         for (uint256 tid = 0; tid < targetInfo.length; tid++) {
             TargetInfo memory target = targetInfo[tid];

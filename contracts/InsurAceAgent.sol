@@ -115,7 +115,6 @@ interface ILPToken {
     ) external;
 
     function pendingBurnAmtPH(address) external view returns (uint256);
-    function burnWeightPH(address) external view returns (uint256);
 }
 
 contract InsurAceAgent is Ownable, ReentrancyGuard {
@@ -128,10 +127,10 @@ contract InsurAceAgent is Ownable, ReentrancyGuard {
     address public depositToken = 0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56;
     address public receiveToken = 0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56;
     address public rewardToken = 0x3192CCDdf1CDcE4Ff055EbC80f3F0231b86A7E30;
-    address public target = 0xdEcAfc91000d4d3802A0562a8Fb896F29b6A7480;
     address public lpToken = 0xDbbB520B40C7B7C6498dbD532AEE5e28c62b3611;
     address public sellRouter = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
     address public rewardController = 0x265aB8950821a4A4e8CED3C81905E4d4488DFC4c;
+    address public target = 0xdEcAfc91000d4d3802A0562a8Fb896F29b6A7480;
     uint256 public minDepositAmount;
     bool public initialized;
 
@@ -194,6 +193,7 @@ contract InsurAceAgent is Ownable, ReentrancyGuard {
         path[0] = rewardToken;
         path[1] = IUniswapV2Router01(sellRouter).WETH();
         path[2] = depositToken;
+        IERC20(rewardToken).approve(sellRouter, claimed);
         IUniswapV2Router01(sellRouter).swapExactTokensForTokens(claimed, 0, path, manager, block.timestamp);
     }
 
@@ -218,16 +218,12 @@ contract InsurAceAgent is Ownable, ReentrancyGuard {
         return amounts[amounts.length - 1].add(depositedAmount);
     }
 
-    function amount() public view returns (uint256, uint256, uint256) {
+    function amount() public view returns (uint256) {
         address stakersV2 = IStakingV2Controller(target).stakersPoolV2();
         uint256 balance = IERC20(lpToken).balanceOf(address(this));
-        uint256 burnable = ILPToken(lpToken).burnableAmtOf(address(this));
-        uint256 pending = ILPToken(lpToken).pendingBurnAmtPH(address(this));
         uint256 totalStakedAmount = IStakersPoolV2(stakersV2).getStakedAmountPT(depositToken);
         uint256 depositedAmount = balance.mul(totalStakedAmount).div(IERC20(lpToken).totalSupply());
-        uint256 pendingWithdrawAmount = pending.mul(totalStakedAmount).div(IERC20(lpToken).totalSupply());
-        uint256 availableWithdrawAmount = burnable.mul(totalStakedAmount).div(IERC20(lpToken).totalSupply());
-        return (depositedAmount, pendingWithdrawAmount, availableWithdrawAmount);
+        return depositedAmount;
     }
 
     function availableDeposit(uint256 _amount) public view returns (uint256) {
@@ -266,11 +262,6 @@ contract InsurAceAgent is Ownable, ReentrancyGuard {
 
     function removable() public pure returns (bool) {
         return false;
-    }
-
-    function unlockTimeLeft() public view returns (uint256) {
-        uint256 endTime = ILPToken(lpToken).burnWeightPH(address(this));
-        return endTime > block.number ? (endTime - block.number) * 3 : 0;
     }
 
 }

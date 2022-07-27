@@ -81,29 +81,17 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IProxyAdmin__factory>;
     getContractFactory(
-      name: "AgentManager",
+      name: "Autofarm",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.AgentManager__factory>;
+    ): Promise<Contracts.Autofarm__factory>;
     getContractFactory(
-      name: "IProxyAdmin",
+      name: "IUniswapPair",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IProxyAdmin__factory>;
+    ): Promise<Contracts.IUniswapPair__factory>;
     getContractFactory(
-      name: "CALottery",
+      name: "IVault",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.CALottery__factory>;
-    getContractFactory(
-      name: "CALottery",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.CALottery__factory>;
-    getContractFactory(
-      name: "FreeToken",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.FreeToken__factory>;
-    getContractFactory(
-      name: "Helper",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.Helper__factory>;
+    ): Promise<Contracts.IVault__factory>;
     getContractFactory(
       name: "ILPToken",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -144,14 +132,6 @@ declare module "hardhat/types/runtime" {
       name: "IRandomNumberGenerator",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IRandomNumberGenerator__factory>;
-    getContractFactory(
-      name: "RandomNumberGenerator",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.RandomNumberGenerator__factory>;
-    getContractFactory(
-      name: "Timelock",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.Timelock__factory>;
 
     getContractAt(
       name: "LinkTokenInterface",
@@ -239,35 +219,20 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IProxyAdmin>;
     getContractAt(
-      name: "AgentManager",
+      name: "Autofarm",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.AgentManager>;
+    ): Promise<Contracts.Autofarm>;
     getContractAt(
-      name: "IProxyAdmin",
+      name: "IUniswapPair",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.IProxyAdmin>;
+    ): Promise<Contracts.IUniswapPair>;
     getContractAt(
-      name: "CALottery",
+      name: "IVault",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.CALottery>;
-    getContractAt(
-      name: "CALottery",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.CALottery>;
-    getContractAt(
-      name: "FreeToken",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.FreeToken>;
-    getContractAt(
-      name: "Helper",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.Helper>;
+    ): Promise<Contracts.IVault>;
     getContractAt(
       name: "ILPToken",
       address: string,
@@ -318,16 +283,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IRandomNumberGenerator>;
-    getContractAt(
-      name: "RandomNumberGenerator",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.RandomNumberGenerator>;
-    getContractAt(
-      name: "Timelock",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.Timelock>;
 
     // default types
     getContractFactory(

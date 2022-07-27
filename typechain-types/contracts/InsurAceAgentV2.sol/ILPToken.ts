@@ -26,6 +26,7 @@ import type {
 export interface ILPTokenInterface extends utils.Interface {
   functions: {
     "burn(address,uint256,uint256)": FunctionFragment;
+    "burnWeightPH(address)": FunctionFragment;
     "burnableAmtOf(address)": FunctionFragment;
     "mint(address,uint256,uint256)": FunctionFragment;
     "pendingBurnAmtPH(address)": FunctionFragment;
@@ -36,6 +37,7 @@ export interface ILPTokenInterface extends utils.Interface {
   getFunction(
     nameOrSignatureOrTopic:
       | "burn"
+      | "burnWeightPH"
       | "burnableAmtOf"
       | "mint"
       | "pendingBurnAmtPH"
@@ -50,6 +52,10 @@ export interface ILPTokenInterface extends utils.Interface {
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>
     ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "burnWeightPH",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "burnableAmtOf",
@@ -81,6 +87,10 @@ export interface ILPTokenInterface extends utils.Interface {
   ): string;
 
   decodeFunctionResult(functionFragment: "burn", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "burnWeightPH",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "burnableAmtOf",
     data: BytesLike
@@ -136,6 +146,11 @@ export interface ILPToken extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    burnWeightPH(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
     burnableAmtOf(
       _account: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -173,6 +188,11 @@ export interface ILPToken extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  burnWeightPH(
+    arg0: PromiseOrValue<string>,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
   burnableAmtOf(
     _account: PromiseOrValue<string>,
     overrides?: CallOverrides
@@ -209,6 +229,11 @@ export interface ILPToken extends BaseContract {
       _poolRewardPerLPToken: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    burnWeightPH(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     burnableAmtOf(
       _account: PromiseOrValue<string>,
@@ -250,6 +275,11 @@ export interface ILPToken extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    burnWeightPH(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     burnableAmtOf(
       _account: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -286,6 +316,11 @@ export interface ILPToken extends BaseContract {
       _amount: PromiseOrValue<BigNumberish>,
       _poolRewardPerLPToken: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    burnWeightPH(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     burnableAmtOf(

@@ -29,20 +29,20 @@ import type {
 
 export interface AgentManagerInterface extends utils.Interface {
   functions: {
-    "BONUS_MULTIPLIER()": FunctionFragment;
     "UpdateAgents(uint256[],uint256[],uint256[],uint256[])": FunctionFragment;
     "add(address)": FunctionFragment;
     "addTarget(address,address[],uint256[])": FunctionFragment;
     "agents(uint256,uint256)": FunctionFragment;
     "apy()": FunctionFragment;
     "autoTargetEnabled()": FunctionFragment;
-    "buyTicket(address,uint256)": FunctionFragment;
     "cancelPendingWithdraw(uint256)": FunctionFragment;
     "debtInfo(uint256,uint256)": FunctionFragment;
     "deposit(uint256,uint256)": FunctionFragment;
     "distributeProfit()": FunctionFragment;
+    "emergencyWithdraw(uint256)": FunctionFragment;
     "feeAddress()": FunctionFragment;
     "feePercent()": FunctionFragment;
+    "freeToken()": FunctionFragment;
     "getAgentLength(uint256)": FunctionFragment;
     "getDebtInfoLength(uint256)": FunctionFragment;
     "getMultiplier(uint256,uint256)": FunctionFragment;
@@ -50,7 +50,7 @@ export interface AgentManagerInterface extends utils.Interface {
     "getTotalProfit()": FunctionFragment;
     "harvest(uint256)": FunctionFragment;
     "harvestAll()": FunctionFragment;
-    "initialize(address,address,uint256,uint256,address)": FunctionFragment;
+    "initialize(address,address,address,uint256,uint256,address)": FunctionFragment;
     "lottery()": FunctionFragment;
     "massUpdatePools()": FunctionFragment;
     "owner()": FunctionFragment;
@@ -76,20 +76,20 @@ export interface AgentManagerInterface extends utils.Interface {
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "BONUS_MULTIPLIER"
       | "UpdateAgents"
       | "add"
       | "addTarget"
       | "agents"
       | "apy"
       | "autoTargetEnabled"
-      | "buyTicket"
       | "cancelPendingWithdraw"
       | "debtInfo"
       | "deposit"
       | "distributeProfit"
+      | "emergencyWithdraw"
       | "feeAddress"
       | "feePercent"
+      | "freeToken"
       | "getAgentLength"
       | "getDebtInfoLength"
       | "getMultiplier"
@@ -122,10 +122,6 @@ export interface AgentManagerInterface extends utils.Interface {
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "BONUS_MULTIPLIER",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "UpdateAgents",
     values: [
       PromiseOrValue<BigNumberish>[],
@@ -156,10 +152,6 @@ export interface AgentManagerInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "buyTicket",
-    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
     functionFragment: "cancelPendingWithdraw",
     values: [PromiseOrValue<BigNumberish>]
   ): string;
@@ -176,6 +168,10 @@ export interface AgentManagerInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "emergencyWithdraw",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
     functionFragment: "feeAddress",
     values?: undefined
   ): string;
@@ -183,6 +179,7 @@ export interface AgentManagerInterface extends utils.Interface {
     functionFragment: "feePercent",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "freeToken", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "getAgentLength",
     values: [PromiseOrValue<BigNumberish>]
@@ -214,6 +211,7 @@ export interface AgentManagerInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "initialize",
     values: [
+      PromiseOrValue<string>,
       PromiseOrValue<string>,
       PromiseOrValue<string>,
       PromiseOrValue<BigNumberish>,
@@ -306,10 +304,6 @@ export interface AgentManagerInterface extends utils.Interface {
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "BONUS_MULTIPLIER",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "UpdateAgents",
     data: BytesLike
   ): Result;
@@ -321,7 +315,6 @@ export interface AgentManagerInterface extends utils.Interface {
     functionFragment: "autoTargetEnabled",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "buyTicket", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "cancelPendingWithdraw",
     data: BytesLike
@@ -332,8 +325,13 @@ export interface AgentManagerInterface extends utils.Interface {
     functionFragment: "distributeProfit",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "emergencyWithdraw",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "feeAddress", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "feePercent", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "freeToken", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getAgentLength",
     data: BytesLike
@@ -539,8 +537,6 @@ export interface AgentManager extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    BONUS_MULTIPLIER(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     UpdateAgents(
       _tids: PromiseOrValue<BigNumberish>[],
       _depositAmount: PromiseOrValue<BigNumberish>[],
@@ -571,12 +567,6 @@ export interface AgentManager extends BaseContract {
 
     autoTargetEnabled(overrides?: CallOverrides): Promise<[boolean]>;
 
-    buyTicket(
-      _user: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     cancelPendingWithdraw(
       _pid: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -598,9 +588,16 @@ export interface AgentManager extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    emergencyWithdraw(
+      _pid: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     feeAddress(overrides?: CallOverrides): Promise<[string]>;
 
     feePercent(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    freeToken(overrides?: CallOverrides): Promise<[string]>;
 
     getAgentLength(
       _tid: PromiseOrValue<BigNumberish>,
@@ -634,6 +631,7 @@ export interface AgentManager extends BaseContract {
     initialize(
       _feeAddress: PromiseOrValue<string>,
       _lottery: PromiseOrValue<string>,
+      _freeToken: PromiseOrValue<string>,
       _apy: PromiseOrValue<BigNumberish>,
       _feePercent: PromiseOrValue<BigNumberish>,
       _proxyAdmin: PromiseOrValue<string>,
@@ -665,7 +663,6 @@ export interface AgentManager extends BaseContract {
         BigNumber,
         BigNumber,
         BigNumber,
-        BigNumber,
         BigNumber
       ] & {
         token: string;
@@ -674,7 +671,6 @@ export interface AgentManager extends BaseContract {
         accAmount: BigNumber;
         lastUpdateTime: BigNumber;
         totalEarned: BigNumber;
-        totalPayed: BigNumber;
         autoTarget: BigNumber;
       }
     >;
@@ -707,9 +703,10 @@ export interface AgentManager extends BaseContract {
       arg0: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<
-      [string, BigNumber, string, string] & {
+      [string, BigNumber, string, string, string] & {
         master: string;
         pid: BigNumber;
+        lpToken: string;
         depositToken: string;
         rewardToken: string;
       }
@@ -756,11 +753,10 @@ export interface AgentManager extends BaseContract {
       arg1: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<
-      [BigNumber, BigNumber, BigNumber, BigNumber, BigNumber] & {
+      [BigNumber, BigNumber, BigNumber, BigNumber] & {
         amount: BigNumber;
         debt: BigNumber;
         pending: BigNumber;
-        accAmount: BigNumber;
         lastUpdateTime: BigNumber;
       }
     >;
@@ -771,8 +767,6 @@ export interface AgentManager extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
   };
-
-  BONUS_MULTIPLIER(overrides?: CallOverrides): Promise<BigNumber>;
 
   UpdateAgents(
     _tids: PromiseOrValue<BigNumberish>[],
@@ -804,12 +798,6 @@ export interface AgentManager extends BaseContract {
 
   autoTargetEnabled(overrides?: CallOverrides): Promise<boolean>;
 
-  buyTicket(
-    _user: PromiseOrValue<string>,
-    _amount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   cancelPendingWithdraw(
     _pid: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -831,9 +819,16 @@ export interface AgentManager extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  emergencyWithdraw(
+    _pid: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   feeAddress(overrides?: CallOverrides): Promise<string>;
 
   feePercent(overrides?: CallOverrides): Promise<BigNumber>;
+
+  freeToken(overrides?: CallOverrides): Promise<string>;
 
   getAgentLength(
     _tid: PromiseOrValue<BigNumberish>,
@@ -867,6 +862,7 @@ export interface AgentManager extends BaseContract {
   initialize(
     _feeAddress: PromiseOrValue<string>,
     _lottery: PromiseOrValue<string>,
+    _freeToken: PromiseOrValue<string>,
     _apy: PromiseOrValue<BigNumberish>,
     _feePercent: PromiseOrValue<BigNumberish>,
     _proxyAdmin: PromiseOrValue<string>,
@@ -898,7 +894,6 @@ export interface AgentManager extends BaseContract {
       BigNumber,
       BigNumber,
       BigNumber,
-      BigNumber,
       BigNumber
     ] & {
       token: string;
@@ -907,7 +902,6 @@ export interface AgentManager extends BaseContract {
       accAmount: BigNumber;
       lastUpdateTime: BigNumber;
       totalEarned: BigNumber;
-      totalPayed: BigNumber;
       autoTarget: BigNumber;
     }
   >;
@@ -940,9 +934,10 @@ export interface AgentManager extends BaseContract {
     arg0: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<
-    [string, BigNumber, string, string] & {
+    [string, BigNumber, string, string, string] & {
       master: string;
       pid: BigNumber;
+      lpToken: string;
       depositToken: string;
       rewardToken: string;
     }
@@ -989,11 +984,10 @@ export interface AgentManager extends BaseContract {
     arg1: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<
-    [BigNumber, BigNumber, BigNumber, BigNumber, BigNumber] & {
+    [BigNumber, BigNumber, BigNumber, BigNumber] & {
       amount: BigNumber;
       debt: BigNumber;
       pending: BigNumber;
-      accAmount: BigNumber;
       lastUpdateTime: BigNumber;
     }
   >;
@@ -1005,8 +999,6 @@ export interface AgentManager extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    BONUS_MULTIPLIER(overrides?: CallOverrides): Promise<BigNumber>;
-
     UpdateAgents(
       _tids: PromiseOrValue<BigNumberish>[],
       _depositAmount: PromiseOrValue<BigNumberish>[],
@@ -1037,12 +1029,6 @@ export interface AgentManager extends BaseContract {
 
     autoTargetEnabled(overrides?: CallOverrides): Promise<boolean>;
 
-    buyTicket(
-      _user: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     cancelPendingWithdraw(
       _pid: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
@@ -1062,9 +1048,16 @@ export interface AgentManager extends BaseContract {
 
     distributeProfit(overrides?: CallOverrides): Promise<void>;
 
+    emergencyWithdraw(
+      _pid: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     feeAddress(overrides?: CallOverrides): Promise<string>;
 
     feePercent(overrides?: CallOverrides): Promise<BigNumber>;
+
+    freeToken(overrides?: CallOverrides): Promise<string>;
 
     getAgentLength(
       _tid: PromiseOrValue<BigNumberish>,
@@ -1096,6 +1089,7 @@ export interface AgentManager extends BaseContract {
     initialize(
       _feeAddress: PromiseOrValue<string>,
       _lottery: PromiseOrValue<string>,
+      _freeToken: PromiseOrValue<string>,
       _apy: PromiseOrValue<BigNumberish>,
       _feePercent: PromiseOrValue<BigNumberish>,
       _proxyAdmin: PromiseOrValue<string>,
@@ -1125,7 +1119,6 @@ export interface AgentManager extends BaseContract {
         BigNumber,
         BigNumber,
         BigNumber,
-        BigNumber,
         BigNumber
       ] & {
         token: string;
@@ -1134,7 +1127,6 @@ export interface AgentManager extends BaseContract {
         accAmount: BigNumber;
         lastUpdateTime: BigNumber;
         totalEarned: BigNumber;
-        totalPayed: BigNumber;
         autoTarget: BigNumber;
       }
     >;
@@ -1165,9 +1157,10 @@ export interface AgentManager extends BaseContract {
       arg0: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<
-      [string, BigNumber, string, string] & {
+      [string, BigNumber, string, string, string] & {
         master: string;
         pid: BigNumber;
+        lpToken: string;
         depositToken: string;
         rewardToken: string;
       }
@@ -1212,11 +1205,10 @@ export interface AgentManager extends BaseContract {
       arg1: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<
-      [BigNumber, BigNumber, BigNumber, BigNumber, BigNumber] & {
+      [BigNumber, BigNumber, BigNumber, BigNumber] & {
         amount: BigNumber;
         debt: BigNumber;
         pending: BigNumber;
-        accAmount: BigNumber;
         lastUpdateTime: BigNumber;
       }
     >;
@@ -1304,8 +1296,6 @@ export interface AgentManager extends BaseContract {
   };
 
   estimateGas: {
-    BONUS_MULTIPLIER(overrides?: CallOverrides): Promise<BigNumber>;
-
     UpdateAgents(
       _tids: PromiseOrValue<BigNumberish>[],
       _depositAmount: PromiseOrValue<BigNumberish>[],
@@ -1336,12 +1326,6 @@ export interface AgentManager extends BaseContract {
 
     autoTargetEnabled(overrides?: CallOverrides): Promise<BigNumber>;
 
-    buyTicket(
-      _user: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
     cancelPendingWithdraw(
       _pid: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -1363,9 +1347,16 @@ export interface AgentManager extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    emergencyWithdraw(
+      _pid: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     feeAddress(overrides?: CallOverrides): Promise<BigNumber>;
 
     feePercent(overrides?: CallOverrides): Promise<BigNumber>;
+
+    freeToken(overrides?: CallOverrides): Promise<BigNumber>;
 
     getAgentLength(
       _tid: PromiseOrValue<BigNumberish>,
@@ -1399,6 +1390,7 @@ export interface AgentManager extends BaseContract {
     initialize(
       _feeAddress: PromiseOrValue<string>,
       _lottery: PromiseOrValue<string>,
+      _freeToken: PromiseOrValue<string>,
       _apy: PromiseOrValue<BigNumberish>,
       _feePercent: PromiseOrValue<BigNumberish>,
       _proxyAdmin: PromiseOrValue<string>,
@@ -1503,8 +1495,6 @@ export interface AgentManager extends BaseContract {
   };
 
   populateTransaction: {
-    BONUS_MULTIPLIER(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     UpdateAgents(
       _tids: PromiseOrValue<BigNumberish>[],
       _depositAmount: PromiseOrValue<BigNumberish>[],
@@ -1535,12 +1525,6 @@ export interface AgentManager extends BaseContract {
 
     autoTargetEnabled(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    buyTicket(
-      _user: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
     cancelPendingWithdraw(
       _pid: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -1562,9 +1546,16 @@ export interface AgentManager extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    emergencyWithdraw(
+      _pid: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     feeAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     feePercent(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    freeToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getAgentLength(
       _tid: PromiseOrValue<BigNumberish>,
@@ -1600,6 +1591,7 @@ export interface AgentManager extends BaseContract {
     initialize(
       _feeAddress: PromiseOrValue<string>,
       _lottery: PromiseOrValue<string>,
+      _freeToken: PromiseOrValue<string>,
       _apy: PromiseOrValue<BigNumberish>,
       _feePercent: PromiseOrValue<BigNumberish>,
       _proxyAdmin: PromiseOrValue<string>,
