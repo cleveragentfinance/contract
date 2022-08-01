@@ -35,7 +35,6 @@ contract CALottery is ReentrancyGuard, ICALottery, Ownable {
     IERC20 public busdToken;
     IERC20 public freeToken;
     IRandomNumberGenerator public randomGenerator;
-    address public manager;
 
     enum Status {
         Pending,
@@ -117,11 +116,10 @@ contract CALottery is ReentrancyGuard, ICALottery, Ownable {
      * @param _busdTokenAddress: address of the busd token
      * @param _randomGeneratorAddress: address of the RandomGenerator contract used to work with ChainLink VRF
      */
-    constructor(address _busdTokenAddress, address _randomGeneratorAddress, address _freeTokenAddress, address _manager) {
+    constructor(address _busdTokenAddress, address _randomGeneratorAddress, address _freeTokenAddress) {
         busdToken = IERC20(_busdTokenAddress);
         randomGenerator = IRandomNumberGenerator(_randomGeneratorAddress);
         freeToken = IERC20(_freeTokenAddress);
-        manager = _manager;
 
         // Initializes a mapping
         _bracketCalculator[0] = 1;
@@ -152,6 +150,7 @@ contract CALottery is ReentrancyGuard, ICALottery, Ownable {
 
         uint256 freeAmount = freeToken.balanceOf(msg.sender) / 1e18;
         uint256 buyAmount = _ticketNumbers.length > freeAmount ? _ticketNumbers.length - freeAmount : 0;
+        freeAmount = _ticketNumbers.length - buyAmount;
 
         // Calculate number of busd to this contract
         uint256 amountBusdToTransfer = _calculateTotalPriceForBulkTickets(
@@ -160,7 +159,7 @@ contract CALottery is ReentrancyGuard, ICALottery, Ownable {
             buyAmount
         );
 
-        freeToken.transferFrom(address(msg.sender), address(this), buyAmount);
+        freeToken.transferFrom(address(msg.sender), address(this), freeAmount);
         if(amountBusdToTransfer > 0)
             // Transfer busd tokens to this contract
             busdToken.safeTransferFrom(address(msg.sender), address(this), amountBusdToTransfer);
@@ -335,16 +334,12 @@ contract CALottery is ReentrancyGuard, ICALottery, Ownable {
         _lotteries[_lotteryId].finalNumber = finalNumber;
         _lotteries[_lotteryId].status = Status.Claimable;
 
-        if (_autoInjection) {
-            pendingInjectionNextLottery = amountToWithdrawToTreasury;
-            amountToWithdrawToTreasury = 0;
-        }
-
-        pendingAmountToWinners += amountToShareToWinners;
+        pendingAmountToWinners += amountToShareToWinners - amountToWithdrawToTreasury;
         amountToWithdrawToTreasury = busdToken.balanceOf(address(this)) - pendingAmountToWinners;
 
-        // Transfer busd to treasury address
-        busdToken.safeTransfer(treasuryAddress, amountToWithdrawToTreasury);
+        if (_autoInjection) {
+            pendingInjectionNextLottery = amountToWithdrawToTreasury;
+        }
 
         emit LotteryNumberDrawn(currentLotteryId, finalNumber, numberAddressesInPreviousBracket);
     }

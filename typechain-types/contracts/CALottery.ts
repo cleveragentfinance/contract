@@ -35,6 +35,7 @@ export declare namespace CALottery {
     priceTicketInBusd: PromiseOrValue<BigNumberish>;
     discountDivisor: PromiseOrValue<BigNumberish>;
     rewardsBreakdown: PromiseOrValue<BigNumberish>[];
+    treasuryFee: PromiseOrValue<BigNumberish>;
     busdPerBracket: PromiseOrValue<BigNumberish>[];
     countWinnersPerBracket: PromiseOrValue<BigNumberish>[];
     firstTicketId: PromiseOrValue<BigNumberish>;
@@ -50,6 +51,7 @@ export declare namespace CALottery {
     BigNumber,
     BigNumber,
     BigNumber[],
+    BigNumber,
     BigNumber[],
     BigNumber[],
     BigNumber,
@@ -63,6 +65,7 @@ export declare namespace CALottery {
     priceTicketInBusd: BigNumber;
     discountDivisor: BigNumber;
     rewardsBreakdown: BigNumber[];
+    treasuryFee: BigNumber;
     busdPerBracket: BigNumber[];
     countWinnersPerBracket: BigNumber[];
     firstTicketId: BigNumber;
@@ -75,6 +78,7 @@ export declare namespace CALottery {
 export interface CALotteryInterface extends utils.Interface {
   functions: {
     "MAX_LENGTH_LOTTERY()": FunctionFragment;
+    "MAX_TREASURY_FEE()": FunctionFragment;
     "MIN_DISCOUNT_DIVISOR()": FunctionFragment;
     "MIN_LENGTH_LOTTERY()": FunctionFragment;
     "busdToken()": FunctionFragment;
@@ -86,9 +90,9 @@ export interface CALotteryInterface extends utils.Interface {
     "currentLotteryId()": FunctionFragment;
     "currentTicketId()": FunctionFragment;
     "drawFinalNumberAndMakeLotteryClaimable(uint256,bool)": FunctionFragment;
+    "freeToken()": FunctionFragment;
     "injectFunds(uint256,uint256)": FunctionFragment;
     "injectorAddress()": FunctionFragment;
-    "manager()": FunctionFragment;
     "maxNumberTicketsPerBuyOrClaim()": FunctionFragment;
     "maxPriceTicketInBusd()": FunctionFragment;
     "minPriceTicketInBusd()": FunctionFragment;
@@ -101,9 +105,10 @@ export interface CALotteryInterface extends utils.Interface {
     "renounceOwnership()": FunctionFragment;
     "setMaxNumberTicketsPerBuy(uint256)": FunctionFragment;
     "setMinAndMaxTicketPriceInBusd(uint256,uint256)": FunctionFragment;
-    "setOperatorAndInjectorAddresses(address,address)": FunctionFragment;
-    "startLottery(uint256,uint256,uint256,uint256[6])": FunctionFragment;
+    "setOperatorAndTreasuryAndInjectorAddresses(address,address,address)": FunctionFragment;
+    "startLottery(uint256,uint256,uint256,uint256[6],uint256)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
+    "treasuryAddress()": FunctionFragment;
     "viewCurrentLotteryId()": FunctionFragment;
     "viewLottery(uint256)": FunctionFragment;
     "viewNumbersAndStatusesForTicketIds(uint256[])": FunctionFragment;
@@ -114,6 +119,7 @@ export interface CALotteryInterface extends utils.Interface {
   getFunction(
     nameOrSignatureOrTopic:
       | "MAX_LENGTH_LOTTERY"
+      | "MAX_TREASURY_FEE"
       | "MIN_DISCOUNT_DIVISOR"
       | "MIN_LENGTH_LOTTERY"
       | "busdToken"
@@ -125,9 +131,9 @@ export interface CALotteryInterface extends utils.Interface {
       | "currentLotteryId"
       | "currentTicketId"
       | "drawFinalNumberAndMakeLotteryClaimable"
+      | "freeToken"
       | "injectFunds"
       | "injectorAddress"
-      | "manager"
       | "maxNumberTicketsPerBuyOrClaim"
       | "maxPriceTicketInBusd"
       | "minPriceTicketInBusd"
@@ -140,9 +146,10 @@ export interface CALotteryInterface extends utils.Interface {
       | "renounceOwnership"
       | "setMaxNumberTicketsPerBuy"
       | "setMinAndMaxTicketPriceInBusd"
-      | "setOperatorAndInjectorAddresses"
+      | "setOperatorAndTreasuryAndInjectorAddresses"
       | "startLottery"
       | "transferOwnership"
+      | "treasuryAddress"
       | "viewCurrentLotteryId"
       | "viewLottery"
       | "viewNumbersAndStatusesForTicketIds"
@@ -152,6 +159,10 @@ export interface CALotteryInterface extends utils.Interface {
 
   encodeFunctionData(
     functionFragment: "MAX_LENGTH_LOTTERY",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "MAX_TREASURY_FEE",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -203,6 +214,7 @@ export interface CALotteryInterface extends utils.Interface {
     functionFragment: "drawFinalNumberAndMakeLotteryClaimable",
     values: [PromiseOrValue<BigNumberish>, PromiseOrValue<boolean>]
   ): string;
+  encodeFunctionData(functionFragment: "freeToken", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "injectFunds",
     values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
@@ -211,7 +223,6 @@ export interface CALotteryInterface extends utils.Interface {
     functionFragment: "injectorAddress",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "manager", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "maxNumberTicketsPerBuyOrClaim",
     values?: undefined
@@ -258,8 +269,12 @@ export interface CALotteryInterface extends utils.Interface {
     values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
-    functionFragment: "setOperatorAndInjectorAddresses",
-    values: [PromiseOrValue<string>, PromiseOrValue<string>]
+    functionFragment: "setOperatorAndTreasuryAndInjectorAddresses",
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<string>,
+      PromiseOrValue<string>
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "startLottery",
@@ -267,12 +282,17 @@ export interface CALotteryInterface extends utils.Interface {
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>[]
+      PromiseOrValue<BigNumberish>[],
+      PromiseOrValue<BigNumberish>
     ]
   ): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "treasuryAddress",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "viewCurrentLotteryId",
@@ -306,6 +326,10 @@ export interface CALotteryInterface extends utils.Interface {
 
   decodeFunctionResult(
     functionFragment: "MAX_LENGTH_LOTTERY",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "MAX_TREASURY_FEE",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -346,6 +370,7 @@ export interface CALotteryInterface extends utils.Interface {
     functionFragment: "drawFinalNumberAndMakeLotteryClaimable",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "freeToken", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "injectFunds",
     data: BytesLike
@@ -354,7 +379,6 @@ export interface CALotteryInterface extends utils.Interface {
     functionFragment: "injectorAddress",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "manager", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "maxNumberTicketsPerBuyOrClaim",
     data: BytesLike
@@ -401,7 +425,7 @@ export interface CALotteryInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setOperatorAndInjectorAddresses",
+    functionFragment: "setOperatorAndTreasuryAndInjectorAddresses",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -410,6 +434,10 @@ export interface CALotteryInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "treasuryAddress",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -439,7 +467,7 @@ export interface CALotteryInterface extends utils.Interface {
     "LotteryInjection(uint256,uint256)": EventFragment;
     "LotteryNumberDrawn(uint256,uint256,uint256)": EventFragment;
     "LotteryOpen(uint256,uint256,uint256,uint256,uint256,uint256)": EventFragment;
-    "NewOperatorAndInjectorAddresses(address,address)": EventFragment;
+    "NewOperatorAndTreasuryAndInjectorAddresses(address,address,address)": EventFragment;
     "NewRandomGenerator(address)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
     "TicketsClaim(address,uint256,uint256,uint256)": EventFragment;
@@ -452,7 +480,7 @@ export interface CALotteryInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "LotteryNumberDrawn"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "LotteryOpen"): EventFragment;
   getEvent(
-    nameOrSignatureOrTopic: "NewOperatorAndInjectorAddresses"
+    nameOrSignatureOrTopic: "NewOperatorAndTreasuryAndInjectorAddresses"
   ): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NewRandomGenerator"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
@@ -523,17 +551,18 @@ export type LotteryOpenEvent = TypedEvent<
 
 export type LotteryOpenEventFilter = TypedEventFilter<LotteryOpenEvent>;
 
-export interface NewOperatorAndInjectorAddressesEventObject {
+export interface NewOperatorAndTreasuryAndInjectorAddressesEventObject {
   operator: string;
+  treasury: string;
   injector: string;
 }
-export type NewOperatorAndInjectorAddressesEvent = TypedEvent<
-  [string, string],
-  NewOperatorAndInjectorAddressesEventObject
+export type NewOperatorAndTreasuryAndInjectorAddressesEvent = TypedEvent<
+  [string, string, string],
+  NewOperatorAndTreasuryAndInjectorAddressesEventObject
 >;
 
-export type NewOperatorAndInjectorAddressesEventFilter =
-  TypedEventFilter<NewOperatorAndInjectorAddressesEvent>;
+export type NewOperatorAndTreasuryAndInjectorAddressesEventFilter =
+  TypedEventFilter<NewOperatorAndTreasuryAndInjectorAddressesEvent>;
 
 export interface NewRandomGeneratorEventObject {
   randomGenerator: string;
@@ -612,6 +641,8 @@ export interface CALottery extends BaseContract {
   functions: {
     MAX_LENGTH_LOTTERY(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    MAX_TREASURY_FEE(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     MIN_DISCOUNT_DIVISOR(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     MIN_LENGTH_LOTTERY(overrides?: CallOverrides): Promise<[BigNumber]>;
@@ -658,6 +689,8 @@ export interface CALottery extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    freeToken(overrides?: CallOverrides): Promise<[string]>;
+
     injectFunds(
       _lotteryId: PromiseOrValue<BigNumberish>,
       _amount: PromiseOrValue<BigNumberish>,
@@ -665,8 +698,6 @@ export interface CALottery extends BaseContract {
     ): Promise<ContractTransaction>;
 
     injectorAddress(overrides?: CallOverrides): Promise<[string]>;
-
-    manager(overrides?: CallOverrides): Promise<[string]>;
 
     maxNumberTicketsPerBuyOrClaim(
       overrides?: CallOverrides
@@ -709,8 +740,9 @@ export interface CALottery extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    setOperatorAndInjectorAddresses(
+    setOperatorAndTreasuryAndInjectorAddresses(
       _operatorAddress: PromiseOrValue<string>,
+      _treasuryAddress: PromiseOrValue<string>,
       _injectorAddress: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -720,6 +752,7 @@ export interface CALottery extends BaseContract {
       _priceTicketInBusd: PromiseOrValue<BigNumberish>,
       _discountDivisor: PromiseOrValue<BigNumberish>,
       _rewardsBreakdown: PromiseOrValue<BigNumberish>[],
+      _treasuryFee: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -727,6 +760,8 @@ export interface CALottery extends BaseContract {
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
+
+    treasuryAddress(overrides?: CallOverrides): Promise<[string]>;
 
     viewCurrentLotteryId(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -757,6 +792,8 @@ export interface CALottery extends BaseContract {
   };
 
   MAX_LENGTH_LOTTERY(overrides?: CallOverrides): Promise<BigNumber>;
+
+  MAX_TREASURY_FEE(overrides?: CallOverrides): Promise<BigNumber>;
 
   MIN_DISCOUNT_DIVISOR(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -804,6 +841,8 @@ export interface CALottery extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  freeToken(overrides?: CallOverrides): Promise<string>;
+
   injectFunds(
     _lotteryId: PromiseOrValue<BigNumberish>,
     _amount: PromiseOrValue<BigNumberish>,
@@ -811,8 +850,6 @@ export interface CALottery extends BaseContract {
   ): Promise<ContractTransaction>;
 
   injectorAddress(overrides?: CallOverrides): Promise<string>;
-
-  manager(overrides?: CallOverrides): Promise<string>;
 
   maxNumberTicketsPerBuyOrClaim(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -851,8 +888,9 @@ export interface CALottery extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  setOperatorAndInjectorAddresses(
+  setOperatorAndTreasuryAndInjectorAddresses(
     _operatorAddress: PromiseOrValue<string>,
+    _treasuryAddress: PromiseOrValue<string>,
     _injectorAddress: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -862,6 +900,7 @@ export interface CALottery extends BaseContract {
     _priceTicketInBusd: PromiseOrValue<BigNumberish>,
     _discountDivisor: PromiseOrValue<BigNumberish>,
     _rewardsBreakdown: PromiseOrValue<BigNumberish>[],
+    _treasuryFee: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -869,6 +908,8 @@ export interface CALottery extends BaseContract {
     newOwner: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
+
+  treasuryAddress(overrides?: CallOverrides): Promise<string>;
 
   viewCurrentLotteryId(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -899,6 +940,8 @@ export interface CALottery extends BaseContract {
 
   callStatic: {
     MAX_LENGTH_LOTTERY(overrides?: CallOverrides): Promise<BigNumber>;
+
+    MAX_TREASURY_FEE(overrides?: CallOverrides): Promise<BigNumber>;
 
     MIN_DISCOUNT_DIVISOR(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -946,6 +989,8 @@ export interface CALottery extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    freeToken(overrides?: CallOverrides): Promise<string>;
+
     injectFunds(
       _lotteryId: PromiseOrValue<BigNumberish>,
       _amount: PromiseOrValue<BigNumberish>,
@@ -953,8 +998,6 @@ export interface CALottery extends BaseContract {
     ): Promise<void>;
 
     injectorAddress(overrides?: CallOverrides): Promise<string>;
-
-    manager(overrides?: CallOverrides): Promise<string>;
 
     maxNumberTicketsPerBuyOrClaim(
       overrides?: CallOverrides
@@ -993,8 +1036,9 @@ export interface CALottery extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    setOperatorAndInjectorAddresses(
+    setOperatorAndTreasuryAndInjectorAddresses(
       _operatorAddress: PromiseOrValue<string>,
+      _treasuryAddress: PromiseOrValue<string>,
       _injectorAddress: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -1004,6 +1048,7 @@ export interface CALottery extends BaseContract {
       _priceTicketInBusd: PromiseOrValue<BigNumberish>,
       _discountDivisor: PromiseOrValue<BigNumberish>,
       _rewardsBreakdown: PromiseOrValue<BigNumberish>[],
+      _treasuryFee: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1011,6 +1056,8 @@ export interface CALottery extends BaseContract {
       newOwner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    treasuryAddress(overrides?: CallOverrides): Promise<string>;
 
     viewCurrentLotteryId(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1096,14 +1143,16 @@ export interface CALottery extends BaseContract {
       injectedAmount?: null
     ): LotteryOpenEventFilter;
 
-    "NewOperatorAndInjectorAddresses(address,address)"(
+    "NewOperatorAndTreasuryAndInjectorAddresses(address,address,address)"(
       operator?: null,
+      treasury?: null,
       injector?: null
-    ): NewOperatorAndInjectorAddressesEventFilter;
-    NewOperatorAndInjectorAddresses(
+    ): NewOperatorAndTreasuryAndInjectorAddressesEventFilter;
+    NewOperatorAndTreasuryAndInjectorAddresses(
       operator?: null,
+      treasury?: null,
       injector?: null
-    ): NewOperatorAndInjectorAddressesEventFilter;
+    ): NewOperatorAndTreasuryAndInjectorAddressesEventFilter;
 
     "NewRandomGenerator(address)"(
       randomGenerator?: PromiseOrValue<string> | null
@@ -1148,6 +1197,8 @@ export interface CALottery extends BaseContract {
 
   estimateGas: {
     MAX_LENGTH_LOTTERY(overrides?: CallOverrides): Promise<BigNumber>;
+
+    MAX_TREASURY_FEE(overrides?: CallOverrides): Promise<BigNumber>;
 
     MIN_DISCOUNT_DIVISOR(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1195,6 +1246,8 @@ export interface CALottery extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    freeToken(overrides?: CallOverrides): Promise<BigNumber>;
+
     injectFunds(
       _lotteryId: PromiseOrValue<BigNumberish>,
       _amount: PromiseOrValue<BigNumberish>,
@@ -1202,8 +1255,6 @@ export interface CALottery extends BaseContract {
     ): Promise<BigNumber>;
 
     injectorAddress(overrides?: CallOverrides): Promise<BigNumber>;
-
-    manager(overrides?: CallOverrides): Promise<BigNumber>;
 
     maxNumberTicketsPerBuyOrClaim(
       overrides?: CallOverrides
@@ -1244,8 +1295,9 @@ export interface CALottery extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    setOperatorAndInjectorAddresses(
+    setOperatorAndTreasuryAndInjectorAddresses(
       _operatorAddress: PromiseOrValue<string>,
+      _treasuryAddress: PromiseOrValue<string>,
       _injectorAddress: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -1255,6 +1307,7 @@ export interface CALottery extends BaseContract {
       _priceTicketInBusd: PromiseOrValue<BigNumberish>,
       _discountDivisor: PromiseOrValue<BigNumberish>,
       _rewardsBreakdown: PromiseOrValue<BigNumberish>[],
+      _treasuryFee: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -1262,6 +1315,8 @@ export interface CALottery extends BaseContract {
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
+
+    treasuryAddress(overrides?: CallOverrides): Promise<BigNumber>;
 
     viewCurrentLotteryId(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1295,6 +1350,8 @@ export interface CALottery extends BaseContract {
     MAX_LENGTH_LOTTERY(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    MAX_TREASURY_FEE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     MIN_DISCOUNT_DIVISOR(
       overrides?: CallOverrides
@@ -1346,6 +1403,8 @@ export interface CALottery extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    freeToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     injectFunds(
       _lotteryId: PromiseOrValue<BigNumberish>,
       _amount: PromiseOrValue<BigNumberish>,
@@ -1353,8 +1412,6 @@ export interface CALottery extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     injectorAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    manager(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     maxNumberTicketsPerBuyOrClaim(
       overrides?: CallOverrides
@@ -1403,8 +1460,9 @@ export interface CALottery extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    setOperatorAndInjectorAddresses(
+    setOperatorAndTreasuryAndInjectorAddresses(
       _operatorAddress: PromiseOrValue<string>,
+      _treasuryAddress: PromiseOrValue<string>,
       _injectorAddress: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
@@ -1414,6 +1472,7 @@ export interface CALottery extends BaseContract {
       _priceTicketInBusd: PromiseOrValue<BigNumberish>,
       _discountDivisor: PromiseOrValue<BigNumberish>,
       _rewardsBreakdown: PromiseOrValue<BigNumberish>[],
+      _treasuryFee: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -1421,6 +1480,8 @@ export interface CALottery extends BaseContract {
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
+
+    treasuryAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     viewCurrentLotteryId(
       overrides?: CallOverrides

@@ -466,12 +466,13 @@ contract AgentManager is Ownable {
         feeAddress = _feeAddress;
     }
 
-    function updateConfig(uint256 _apy, uint256 _feePercent, address _lottery, address[] memory _routers) public onlyOwner {
+    function updateConfig(uint256 _apy, uint256 _feePercent, address _lottery, address _free, address[] memory _routers) public onlyOwner {
         require(_feePercent <= 10000, "can't exceeds 100%");
         apy = _apy;
         routers = _routers;
         feePercent = _feePercent;
         lottery = _lottery;
+        freeToken = _free;
     }
 
     function distributeProfit() public onlyOwner {

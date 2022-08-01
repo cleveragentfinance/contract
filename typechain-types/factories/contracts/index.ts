@@ -3,5 +3,11 @@
 /* eslint-disable */
 export * as agentManagerSol from "./AgentManager.sol";
 export * as autofarmSol from "./Autofarm.sol";
+export * as freeSol from "./Free.sol";
 export * as insurAceAgentSol from "./InsurAceAgent.sol";
+export * as liquiditySol from "./Liquidity.sol";
+export * as randomnumbergeneratorSol from "./Randomnumbergenerator.sol";
 export * as interfaces from "./interfaces";
+export { CALottery__factory } from "./CALottery__factory";
+export { Helper__factory } from "./Helper__factory";
+export { Timelock__factory } from "./Timelock__factory";

@@ -67,7 +67,7 @@ export interface AgentManagerInterface extends utils.Interface {
     "toggleAutoTarget()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "updateAgentToNewContract(uint256,address)": FunctionFragment;
-    "updateConfig(uint256,uint256,address,address[])": FunctionFragment;
+    "updateConfig(uint256,uint256,address,address,address[])": FunctionFragment;
     "updatePool(uint256)": FunctionFragment;
     "updateUser(uint256,address)": FunctionFragment;
     "userInfo(uint256,address)": FunctionFragment;
@@ -282,6 +282,7 @@ export interface AgentManagerInterface extends utils.Interface {
     values: [
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>,
       PromiseOrValue<string>,
       PromiseOrValue<string>[]
     ]
@@ -733,6 +734,7 @@ export interface AgentManager extends BaseContract {
       _apy: PromiseOrValue<BigNumberish>,
       _feePercent: PromiseOrValue<BigNumberish>,
       _lottery: PromiseOrValue<string>,
+      _free: PromiseOrValue<string>,
       _routers: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -964,6 +966,7 @@ export interface AgentManager extends BaseContract {
     _apy: PromiseOrValue<BigNumberish>,
     _feePercent: PromiseOrValue<BigNumberish>,
     _lottery: PromiseOrValue<string>,
+    _free: PromiseOrValue<string>,
     _routers: PromiseOrValue<string>[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -1185,6 +1188,7 @@ export interface AgentManager extends BaseContract {
       _apy: PromiseOrValue<BigNumberish>,
       _feePercent: PromiseOrValue<BigNumberish>,
       _lottery: PromiseOrValue<string>,
+      _free: PromiseOrValue<string>,
       _routers: PromiseOrValue<string>[],
       overrides?: CallOverrides
     ): Promise<void>;
@@ -1466,6 +1470,7 @@ export interface AgentManager extends BaseContract {
       _apy: PromiseOrValue<BigNumberish>,
       _feePercent: PromiseOrValue<BigNumberish>,
       _lottery: PromiseOrValue<string>,
+      _free: PromiseOrValue<string>,
       _routers: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -1667,6 +1672,7 @@ export interface AgentManager extends BaseContract {
       _apy: PromiseOrValue<BigNumberish>,
       _feePercent: PromiseOrValue<BigNumberish>,
       _lottery: PromiseOrValue<string>,
+      _free: PromiseOrValue<string>,
       _routers: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
