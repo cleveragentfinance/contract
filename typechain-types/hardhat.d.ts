@@ -97,6 +97,22 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.CALottery__factory>;
     getContractFactory(
+      name: "Ellipsis",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Ellipsis__factory>;
+    getContractFactory(
+      name: "IEllipsisRouter",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IEllipsisRouter__factory>;
+    getContractFactory(
+      name: "ILPToken",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ILPToken__factory>;
+    getContractFactory(
+      name: "IVault",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IVault__factory>;
+    getContractFactory(
       name: "FreeToken",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.FreeToken__factory>;
@@ -266,6 +282,26 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.CALottery>;
+    getContractAt(
+      name: "Ellipsis",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Ellipsis>;
+    getContractAt(
+      name: "IEllipsisRouter",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IEllipsisRouter>;
+    getContractAt(
+      name: "ILPToken",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ILPToken>;
+    getContractAt(
+      name: "IVault",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IVault>;
     getContractAt(
       name: "FreeToken",
       address: string,

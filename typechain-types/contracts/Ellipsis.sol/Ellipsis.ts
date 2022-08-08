@@ -13,7 +13,11 @@ import type {
   Signer,
   utils,
 } from "ethers";
-import type { FunctionFragment, Result } from "@ethersproject/abi";
+import type {
+  FunctionFragment,
+  Result,
+  EventFragment,
+} from "@ethersproject/abi";
 import type { Listener, Provider } from "@ethersproject/providers";
 import type {
   TypedEventFilter,
@@ -23,8 +27,9 @@ import type {
   PromiseOrValue,
 } from "../../common";
 
-export interface IAgentInterface extends utils.Interface {
+export interface EllipsisInterface extends utils.Interface {
   functions: {
+    "amount()": FunctionFragment;
     "availableDeposit(uint256)": FunctionFragment;
     "availableHarvest()": FunctionFragment;
     "availableUnlock(uint256)": FunctionFragment;
@@ -34,17 +39,29 @@ export interface IAgentInterface extends utils.Interface {
     "harvest()": FunctionFragment;
     "init(address[],uint256[])": FunctionFragment;
     "initialized()": FunctionFragment;
+    "lpRouter()": FunctionFragment;
+    "manager()": FunctionFragment;
+    "owner()": FunctionFragment;
     "pendingReward()": FunctionFragment;
+    "receiveToken()": FunctionFragment;
     "removable()": FunctionFragment;
+    "renounceOwnership()": FunctionFragment;
     "rewardToken()": FunctionFragment;
+    "sellRouter()": FunctionFragment;
+    "target()": FunctionFragment;
+    "token0()": FunctionFragment;
+    "totalDepositedAmount()": FunctionFragment;
     "totalValueLocked()": FunctionFragment;
+    "transferOwnership(address)": FunctionFragment;
     "unlockHarvest()": FunctionFragment;
+    "unlockTimeLeft()": FunctionFragment;
     "unlockWithdraw(uint256)": FunctionFragment;
     "withdraw(uint256)": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
+      | "amount"
       | "availableDeposit"
       | "availableHarvest"
       | "availableUnlock"
@@ -54,15 +71,27 @@ export interface IAgentInterface extends utils.Interface {
       | "harvest"
       | "init"
       | "initialized"
+      | "lpRouter"
+      | "manager"
+      | "owner"
       | "pendingReward"
+      | "receiveToken"
       | "removable"
+      | "renounceOwnership"
       | "rewardToken"
+      | "sellRouter"
+      | "target"
+      | "token0"
+      | "totalDepositedAmount"
       | "totalValueLocked"
+      | "transferOwnership"
       | "unlockHarvest"
+      | "unlockTimeLeft"
       | "unlockWithdraw"
       | "withdraw"
   ): FunctionFragment;
 
+  encodeFunctionData(functionFragment: "amount", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "availableDeposit",
     values: [PromiseOrValue<BigNumberish>]
@@ -93,13 +122,34 @@ export interface IAgentInterface extends utils.Interface {
     functionFragment: "initialized",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "lpRouter", values?: undefined): string;
+  encodeFunctionData(functionFragment: "manager", values?: undefined): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "pendingReward",
     values?: undefined
   ): string;
+  encodeFunctionData(
+    functionFragment: "receiveToken",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "removable", values?: undefined): string;
   encodeFunctionData(
+    functionFragment: "renounceOwnership",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "rewardToken",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "sellRouter",
+    values?: undefined
+  ): string;
+  encodeFunctionData(functionFragment: "target", values?: undefined): string;
+  encodeFunctionData(functionFragment: "token0", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "totalDepositedAmount",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -107,7 +157,15 @@ export interface IAgentInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "transferOwnership",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
     functionFragment: "unlockHarvest",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "unlockTimeLeft",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -119,6 +177,7 @@ export interface IAgentInterface extends utils.Interface {
     values: [PromiseOrValue<BigNumberish>]
   ): string;
 
+  decodeFunctionResult(functionFragment: "amount", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "availableDeposit",
     data: BytesLike
@@ -146,13 +205,31 @@ export interface IAgentInterface extends utils.Interface {
     functionFragment: "initialized",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "lpRouter", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "manager", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "pendingReward",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "receiveToken",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "removable", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "renounceOwnership",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "rewardToken",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "sellRouter", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "target", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "token0", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "totalDepositedAmount",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -160,7 +237,15 @@ export interface IAgentInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "transferOwnership",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "unlockHarvest",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "unlockTimeLeft",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -169,15 +254,31 @@ export interface IAgentInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 
-  events: {};
+  events: {
+    "OwnershipTransferred(address,address)": EventFragment;
+  };
+
+  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
 }
 
-export interface IAgent extends BaseContract {
+export interface OwnershipTransferredEventObject {
+  previousOwner: string;
+  newOwner: string;
+}
+export type OwnershipTransferredEvent = TypedEvent<
+  [string, string],
+  OwnershipTransferredEventObject
+>;
+
+export type OwnershipTransferredEventFilter =
+  TypedEventFilter<OwnershipTransferredEvent>;
+
+export interface Ellipsis extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: IAgentInterface;
+  interface: EllipsisInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -199,8 +300,12 @@ export interface IAgent extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    amount(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber, BigNumber, BigNumber]>;
+
     availableDeposit(
-      arg0: PromiseOrValue<BigNumberish>,
+      _amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
@@ -212,7 +317,7 @@ export interface IAgent extends BaseContract {
     ): Promise<[BigNumber]>;
 
     availableWithdraw(
-      arg0: PromiseOrValue<BigNumberish>,
+      _amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
@@ -227,38 +332,65 @@ export interface IAgent extends BaseContract {
     ): Promise<ContractTransaction>;
 
     init(
-      arg0: PromiseOrValue<string>[],
-      arg1: PromiseOrValue<BigNumberish>[],
+      _addresses: PromiseOrValue<string>[],
+      _values: PromiseOrValue<BigNumberish>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
     initialized(overrides?: CallOverrides): Promise<[boolean]>;
 
+    lpRouter(overrides?: CallOverrides): Promise<[string]>;
+
+    manager(overrides?: CallOverrides): Promise<[string]>;
+
+    owner(overrides?: CallOverrides): Promise<[string]>;
+
     pendingReward(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    receiveToken(overrides?: CallOverrides): Promise<[string]>;
 
     removable(overrides?: CallOverrides): Promise<[boolean]>;
 
+    renounceOwnership(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     rewardToken(overrides?: CallOverrides): Promise<[string]>;
+
+    sellRouter(overrides?: CallOverrides): Promise<[string]>;
+
+    target(overrides?: CallOverrides): Promise<[string]>;
+
+    token0(overrides?: CallOverrides): Promise<[string]>;
+
+    totalDepositedAmount(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     totalValueLocked(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    unlockHarvest(
+    transferOwnership(
+      newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
+
+    unlockHarvest(overrides?: CallOverrides): Promise<[void]>;
+
+    unlockTimeLeft(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     unlockWithdraw(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+      _amount: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[void]>;
 
     withdraw(
-      arg0: PromiseOrValue<BigNumberish>,
+      _amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
   };
 
+  amount(overrides?: CallOverrides): Promise<[BigNumber, BigNumber, BigNumber]>;
+
   availableDeposit(
-    arg0: PromiseOrValue<BigNumberish>,
+    _amount: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
@@ -270,7 +402,7 @@ export interface IAgent extends BaseContract {
   ): Promise<BigNumber>;
 
   availableWithdraw(
-    arg0: PromiseOrValue<BigNumberish>,
+    _amount: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
@@ -285,38 +417,67 @@ export interface IAgent extends BaseContract {
   ): Promise<ContractTransaction>;
 
   init(
-    arg0: PromiseOrValue<string>[],
-    arg1: PromiseOrValue<BigNumberish>[],
+    _addresses: PromiseOrValue<string>[],
+    _values: PromiseOrValue<BigNumberish>[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   initialized(overrides?: CallOverrides): Promise<boolean>;
 
+  lpRouter(overrides?: CallOverrides): Promise<string>;
+
+  manager(overrides?: CallOverrides): Promise<string>;
+
+  owner(overrides?: CallOverrides): Promise<string>;
+
   pendingReward(overrides?: CallOverrides): Promise<BigNumber>;
+
+  receiveToken(overrides?: CallOverrides): Promise<string>;
 
   removable(overrides?: CallOverrides): Promise<boolean>;
 
+  renounceOwnership(
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   rewardToken(overrides?: CallOverrides): Promise<string>;
+
+  sellRouter(overrides?: CallOverrides): Promise<string>;
+
+  target(overrides?: CallOverrides): Promise<string>;
+
+  token0(overrides?: CallOverrides): Promise<string>;
+
+  totalDepositedAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
   totalValueLocked(overrides?: CallOverrides): Promise<BigNumber>;
 
-  unlockHarvest(
+  transferOwnership(
+    newOwner: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
+
+  unlockHarvest(overrides?: CallOverrides): Promise<void>;
+
+  unlockTimeLeft(overrides?: CallOverrides): Promise<BigNumber>;
 
   unlockWithdraw(
-    arg0: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+    _amount: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<void>;
 
   withdraw(
-    arg0: PromiseOrValue<BigNumberish>,
+    _amount: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   callStatic: {
+    amount(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber, BigNumber, BigNumber]>;
+
     availableDeposit(
-      arg0: PromiseOrValue<BigNumberish>,
+      _amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -328,7 +489,7 @@ export interface IAgent extends BaseContract {
     ): Promise<BigNumber>;
 
     availableWithdraw(
-      arg0: PromiseOrValue<BigNumberish>,
+      _amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -339,39 +500,75 @@ export interface IAgent extends BaseContract {
     harvest(overrides?: CallOverrides): Promise<void>;
 
     init(
-      arg0: PromiseOrValue<string>[],
-      arg1: PromiseOrValue<BigNumberish>[],
+      _addresses: PromiseOrValue<string>[],
+      _values: PromiseOrValue<BigNumberish>[],
       overrides?: CallOverrides
     ): Promise<void>;
 
     initialized(overrides?: CallOverrides): Promise<boolean>;
 
+    lpRouter(overrides?: CallOverrides): Promise<string>;
+
+    manager(overrides?: CallOverrides): Promise<string>;
+
+    owner(overrides?: CallOverrides): Promise<string>;
+
     pendingReward(overrides?: CallOverrides): Promise<BigNumber>;
+
+    receiveToken(overrides?: CallOverrides): Promise<string>;
 
     removable(overrides?: CallOverrides): Promise<boolean>;
 
+    renounceOwnership(overrides?: CallOverrides): Promise<void>;
+
     rewardToken(overrides?: CallOverrides): Promise<string>;
+
+    sellRouter(overrides?: CallOverrides): Promise<string>;
+
+    target(overrides?: CallOverrides): Promise<string>;
+
+    token0(overrides?: CallOverrides): Promise<string>;
+
+    totalDepositedAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
     totalValueLocked(overrides?: CallOverrides): Promise<BigNumber>;
 
+    transferOwnership(
+      newOwner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     unlockHarvest(overrides?: CallOverrides): Promise<void>;
 
+    unlockTimeLeft(overrides?: CallOverrides): Promise<BigNumber>;
+
     unlockWithdraw(
-      arg0: PromiseOrValue<BigNumberish>,
+      _amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
     withdraw(
-      arg0: PromiseOrValue<BigNumberish>,
+      _amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
   };
 
-  filters: {};
+  filters: {
+    "OwnershipTransferred(address,address)"(
+      previousOwner?: PromiseOrValue<string> | null,
+      newOwner?: PromiseOrValue<string> | null
+    ): OwnershipTransferredEventFilter;
+    OwnershipTransferred(
+      previousOwner?: PromiseOrValue<string> | null,
+      newOwner?: PromiseOrValue<string> | null
+    ): OwnershipTransferredEventFilter;
+  };
 
   estimateGas: {
+    amount(overrides?: CallOverrides): Promise<BigNumber>;
+
     availableDeposit(
-      arg0: PromiseOrValue<BigNumberish>,
+      _amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -383,7 +580,7 @@ export interface IAgent extends BaseContract {
     ): Promise<BigNumber>;
 
     availableWithdraw(
-      arg0: PromiseOrValue<BigNumberish>,
+      _amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -398,39 +595,66 @@ export interface IAgent extends BaseContract {
     ): Promise<BigNumber>;
 
     init(
-      arg0: PromiseOrValue<string>[],
-      arg1: PromiseOrValue<BigNumberish>[],
+      _addresses: PromiseOrValue<string>[],
+      _values: PromiseOrValue<BigNumberish>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     initialized(overrides?: CallOverrides): Promise<BigNumber>;
 
+    lpRouter(overrides?: CallOverrides): Promise<BigNumber>;
+
+    manager(overrides?: CallOverrides): Promise<BigNumber>;
+
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
+
     pendingReward(overrides?: CallOverrides): Promise<BigNumber>;
+
+    receiveToken(overrides?: CallOverrides): Promise<BigNumber>;
 
     removable(overrides?: CallOverrides): Promise<BigNumber>;
 
+    renounceOwnership(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     rewardToken(overrides?: CallOverrides): Promise<BigNumber>;
+
+    sellRouter(overrides?: CallOverrides): Promise<BigNumber>;
+
+    target(overrides?: CallOverrides): Promise<BigNumber>;
+
+    token0(overrides?: CallOverrides): Promise<BigNumber>;
+
+    totalDepositedAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
     totalValueLocked(overrides?: CallOverrides): Promise<BigNumber>;
 
-    unlockHarvest(
+    transferOwnership(
+      newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    unlockHarvest(overrides?: CallOverrides): Promise<BigNumber>;
+
+    unlockTimeLeft(overrides?: CallOverrides): Promise<BigNumber>;
+
     unlockWithdraw(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      _amount: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     withdraw(
-      arg0: PromiseOrValue<BigNumberish>,
+      _amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
+    amount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     availableDeposit(
-      arg0: PromiseOrValue<BigNumberish>,
+      _amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -442,7 +666,7 @@ export interface IAgent extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     availableWithdraw(
-      arg0: PromiseOrValue<BigNumberish>,
+      _amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -457,32 +681,59 @@ export interface IAgent extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     init(
-      arg0: PromiseOrValue<string>[],
-      arg1: PromiseOrValue<BigNumberish>[],
+      _addresses: PromiseOrValue<string>[],
+      _values: PromiseOrValue<BigNumberish>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     initialized(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    lpRouter(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    manager(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     pendingReward(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    receiveToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     removable(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    renounceOwnership(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     rewardToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    sellRouter(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    target(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    token0(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    totalDepositedAmount(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     totalValueLocked(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    unlockHarvest(
+    transferOwnership(
+      newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    unlockHarvest(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    unlockTimeLeft(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     unlockWithdraw(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      _amount: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     withdraw(
-      arg0: PromiseOrValue<BigNumberish>,
+      _amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
   };

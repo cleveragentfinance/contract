@@ -109,6 +109,7 @@ contract Autofarm is Ownable, ReentrancyGuard {
         lpRouter = addresses[4];
         sellRouter = addresses[5];
         pid = _values[0];
+        initialized = true;
     }
 
     function deposit() public onlyOwner {
@@ -175,7 +176,7 @@ contract Autofarm is Ownable, ReentrancyGuard {
         }
         uint256 balance = IERC20(receiveToken).balanceOf(address(this));
         IERC20(receiveToken).transfer(manager, balance);
-        totalDepositedAmount -= totalDepositedAmount.mul(_amount).div(lockedAmount);
+        totalDepositedAmount -= totalDepositedAmount.mul(availableAmount).div(lockedAmount);
     }
 
     function unlockWithdraw(uint256 _amount) public view onlyOwner {
@@ -219,7 +220,7 @@ contract Autofarm is Ownable, ReentrancyGuard {
     }
 
     function amount() public view returns (uint256, uint256, uint256) {
-        return (totalDepositedAmount, 0, pendingReward());
+        return (totalDepositedAmount, 0, totalDepositedAmount);
     }
 
     function availableDeposit(uint256 _amount) public pure returns (uint256) {

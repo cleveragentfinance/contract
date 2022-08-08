@@ -147,6 +147,7 @@ contract InsurAceAgent is Ownable, ReentrancyGuard {
         sellRouter = addresses[5];
         rewardController = addresses[6];
         minDepositAmount = _values[0];
+        initialized = true;
     }
 
     function deposit() public onlyOwner {

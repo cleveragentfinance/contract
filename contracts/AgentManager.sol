@@ -103,6 +103,7 @@ contract AgentManager is Ownable {
         apy = _apy;
         feePercent = _feePercent;
         proxyAdmin = _proxyAdmin;
+        initialized = true;
     }
 
     function _createNewAgent(uint256 _tid, uint256 _amount) internal {
@@ -187,8 +188,11 @@ contract AgentManager is Ownable {
     function _autoDeposit(uint256 _tid, uint256 depositAmount) internal {
         TargetInfo memory target = targetInfo[_tid];
         address[] storage agentList = agents[_tid];
-        if(autoTargetEnabled && _tid > 0)
-            depositAmount = IERC20(target.depositToken).balanceOf(address(this)).mul(9).div(10);
+        if(autoTargetEnabled && _tid > 0 && depositAmount > 0) {
+            uint256 contractBalance = IERC20(target.depositToken).balanceOf(address(this)).mul(9).div(10);
+            uint256 prepareAmount = poolInfo[target.pid].balance.mul(1).div(10);
+            depositAmount = contractBalance > prepareAmount ? contractBalance - prepareAmount : 0;
+        }
         uint256 j = 0;
         while(j < agentList.length && depositAmount > 0) {
             IAgent agent = IAgent(agentList[j]);
@@ -206,14 +210,14 @@ contract AgentManager is Ownable {
         }
     }
 
-    function updateUser(uint256 _pid, address _user) public {
-        UserInfo storage user = userInfo[_pid][_user];
+    function updateUser(uint256 _pid) public {
+        UserInfo storage user = userInfo[_pid][msg.sender];
         uint256 pendingAmount = user.pending;
         if (block.timestamp > user.lastUpdateTime) {
             uint256 multiplier = getMultiplier(user.lastUpdateTime, block.timestamp);
             uint256 reward = multiplier.mul(apy).mul(user.amount).div(1e18);
             user.pending = pendingAmount.add(reward);
-            IERC20(freeToken).transfer(_user, reward * 100);
+            IERC20(freeToken).transfer(msg.sender, reward * 100);
             user.lastUpdateTime = block.timestamp;
         }
     }
@@ -238,14 +242,14 @@ contract AgentManager is Ownable {
     function deposit(uint256 _pid, uint256 _amount) public {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
-        updateUser(_pid, msg.sender);
+        updateUser(_pid);
         updatePool(_pid);
         if(_amount > 0) {
             pool.token.transferFrom(address(msg.sender), address(this), _amount);
             user.amount = user.amount.add(_amount);
             pool.balance = pool.balance.add(_amount);
         }
-        if(autoTargetEnabled && poolInfo[_pid].autoTarget > 0) _autoDeposit(poolInfo[_pid].autoTarget, 0);
+        if(autoTargetEnabled && poolInfo[_pid].autoTarget > 0) _autoDeposit(poolInfo[_pid].autoTarget, _amount);
         emit Deposit(msg.sender, _pid, _amount);
     }
 
@@ -255,7 +259,7 @@ contract AgentManager is Ownable {
         UserInfo storage user = userInfo[_pid][msg.sender];
         require(user.amount >= _amount, "withdraw: not good");
         require(pool.balance >= _amount, "withdraw: insufficient pool balance");
-        updateUser(_pid, msg.sender);
+        updateUser(_pid);
         updatePool(_pid);
         if(_amount > 0) {
             user.amount = user.amount.sub(_amount);
@@ -297,7 +301,7 @@ contract AgentManager is Ownable {
     function harvest(uint256 _pid) public {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
-        updateUser(_pid, msg.sender);
+        updateUser(_pid);
         pool.token.transfer(address(msg.sender), user.pending);
         user.pending = 0;
         emit Harvest(msg.sender, _pid, user.pending);
@@ -348,6 +352,7 @@ contract AgentManager is Ownable {
     // Add a new lp to the pool. Can only be called by the owner.
     // XXX DO NOT add the same LP token more than once. Rewards will be messed up if you do.
     function add(IERC20 _token) public onlyOwner {
+        require(address(_token) != address(0), "zero address!");
         for (uint256 index = 0; index < poolInfo.length; index++) {
             require(poolInfo[index].token != _token, "duplicated pool");
         }
@@ -363,6 +368,7 @@ contract AgentManager is Ownable {
     }
 
     function addTarget(address _master, address[] memory _initAddresses, uint256[] memory _initNumbers) public onlyOwner {
+        require(_initAddresses.length >= 3, "invalid address array");
         uint256 pid;
         for (uint256 index = 0; index < poolInfo.length; index++) {
             if(address(poolInfo[index].token) == _initAddresses[1])
@@ -378,22 +384,6 @@ contract AgentManager is Ownable {
             initNumbers: _initNumbers
         }));
     }
-
-    // function updateTarget(uint256 _tid, address _master, address[] memory _initAddresses, uint256[] memory _initNumbers) public onlyOwner {
-    //     uint256 pid;
-    //     for (uint256 index = 0; index < poolInfo.length; index++) {
-    //         if(address(poolInfo[index].token) == _initAddresses[1])
-    //             pid = index;
-    //     }
-    //     TargetInfo memory target = targetInfo[_tid];
-    //     target.master = _master;
-    //     target.pid = pid;
-    //     target.lpToken = _initAddresses[0];
-    //     target.depositToken = _initAddresses[1];
-    //     target.rewardToken =  _initAddresses[2];
-    //     target.initAddresses = _initAddresses;
-    //     target.initNumbers = _initNumbers;
-    // }
 
     function UpdateAgents(uint256[] memory _tids, uint256[] memory _depositAmount, uint256[] memory _withdrawAmount, uint256[] memory _unlockAmount) public onlyOwner{
         for (uint256 i = 0; i < _tids.length; i++) {
@@ -442,18 +432,20 @@ contract AgentManager is Ownable {
     }
 
     function updateAgentToNewContract(uint256 _tid, address _master) public onlyOwner{
-        TargetInfo memory target = targetInfo[_tid];
+        TargetInfo storage target = targetInfo[_tid];
         target.master = _master;
         address[] storage agentList = agents[_tid];
         for (uint256 aid = 0; aid < agentList.length; aid++) {
             IProxyAdmin(proxyAdmin).upgrade(agentList[aid], _master);
+            if(IAgent(agentList[aid]).initialized() == false)
+                IAgent(agentList[aid]).init(target.initAddresses, target.initNumbers);
         }
     }
 
     function setAutoTarget(uint256 _pid, uint256 _tid) public onlyOwner {
         require(_pid < poolInfo.length, "invalid pid");
         require(_tid < targetInfo.length, "invalid tid");
-        require(_tid > 0, "auto target should be bigger than 1");
+        require(_tid > 0, "auto target should be bigger than 0");
         poolInfo[_pid].autoTarget = _tid;
     }
 

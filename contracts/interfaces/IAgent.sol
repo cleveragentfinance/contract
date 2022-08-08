@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 interface IAgent {
+    function initialized() external view returns (bool);
     function init(address[] memory, uint256[] memory) external;
     function totalValueLocked() external view returns (uint256);
     function availableDeposit(uint256) external view returns (uint256);

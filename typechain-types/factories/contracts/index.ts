@@ -3,6 +3,7 @@
 /* eslint-disable */
 export * as agentManagerSol from "./AgentManager.sol";
 export * as autofarmSol from "./Autofarm.sol";
+export * as ellipsisSol from "./Ellipsis.sol";
 export * as freeSol from "./Free.sol";
 export * as insurAceAgentSol from "./InsurAceAgent.sol";
 export * as liquiditySol from "./Liquidity.sol";

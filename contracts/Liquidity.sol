@@ -94,6 +94,7 @@ contract Liquidity is Ownable, ReentrancyGuard {
         rewardToken = addresses[2];
         lpRouter = addresses[3];
         sellRouter = addresses[4];
+        initialized = true;
     }
 
     function deposit() public onlyOwner {

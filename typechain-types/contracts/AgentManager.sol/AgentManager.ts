@@ -69,7 +69,7 @@ export interface AgentManagerInterface extends utils.Interface {
     "updateAgentToNewContract(uint256,address)": FunctionFragment;
     "updateConfig(uint256,uint256,address,address,address[])": FunctionFragment;
     "updatePool(uint256)": FunctionFragment;
-    "updateUser(uint256,address)": FunctionFragment;
+    "updateUser(uint256)": FunctionFragment;
     "userInfo(uint256,address)": FunctionFragment;
     "withdraw(uint256,uint256)": FunctionFragment;
   };
@@ -293,7 +293,7 @@ export interface AgentManagerInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "updateUser",
-    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<string>]
+    values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
     functionFragment: "userInfo",
@@ -746,7 +746,6 @@ export interface AgentManager extends BaseContract {
 
     updateUser(
       _pid: PromiseOrValue<BigNumberish>,
-      _user: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -978,7 +977,6 @@ export interface AgentManager extends BaseContract {
 
   updateUser(
     _pid: PromiseOrValue<BigNumberish>,
-    _user: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -1200,7 +1198,6 @@ export interface AgentManager extends BaseContract {
 
     updateUser(
       _pid: PromiseOrValue<BigNumberish>,
-      _user: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1482,7 +1479,6 @@ export interface AgentManager extends BaseContract {
 
     updateUser(
       _pid: PromiseOrValue<BigNumberish>,
-      _user: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -1684,7 +1680,6 @@ export interface AgentManager extends BaseContract {
 
     updateUser(
       _pid: PromiseOrValue<BigNumberish>,
-      _user: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

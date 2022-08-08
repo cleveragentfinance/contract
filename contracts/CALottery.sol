@@ -159,7 +159,7 @@ contract CALottery is ReentrancyGuard, ICALottery, Ownable {
             buyAmount
         );
 
-        freeToken.transferFrom(address(msg.sender), address(this), freeAmount);
+        freeToken.transferFrom(address(msg.sender), address(this), freeAmount * 1e18);
         if(amountBusdToTransfer > 0)
             // Transfer busd tokens to this contract
             busdToken.safeTransferFrom(address(msg.sender), address(this), amountBusdToTransfer);
